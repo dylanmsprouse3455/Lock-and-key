@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Participant Dashboard</title>
+  <style>
+    :root{
+      --bg1:#f8fbff;
+      --bg2:#eef4ff;
+      --card:#ffffff;
+      --line:#e8edf5;
+      --text:#182033;
+      --muted:#6b7280;
+      --blue:#2563eb;
+      --blue-soft:#edf4ff;
+      --green:#127a45;
+      --green-soft:#ecfdf3;
+      --orange:#b54708;
+      --orange-soft:#fff7ed;
+      --purple:#7c3aed;
+      --purple-soft:#f5f3ff;
+      --red:#b42318;
+      --red-soft:#fef3f2;
+      --shadow:0 18px 45px rgba(15,23,42,.08);
+      --sheet-shadow:0 -18px 40px rgba(15,23,42,.14);
+      --drawer-shadow:-10px 0 32px rgba(15,23,42,.12);
+      --safe-bottom:env(safe-area-inset-bottom, 0px);
+    }
+
+    *{
+      box-sizing:border-box;
+      -webkit-tap-highlight-color:transparent;
+    }
+
+    html,body{
+      margin:0;
+      padding:0;
+      min-height:100%;
+      font-family:Arial, Helvetica, sans-serif;
+      color:var(--text);
+      background:radial-gradient(circle at top left, #ffffff 0%, #f8fbff 35%, #eef4ff 100%);
+    }
+
+    body{
+      padding:18px;
+      overflow-x:hidden;
+    }
+
+    button{
+      font:inherit;
+    }
+
+    .wrap{
+      width:min(1150px,96%);
+      margin:0 auto;
+    }
+
+    .hero{
+      background:rgba(255,255,255,.84);
+      backdrop-filter:blur(12px);
+      border:1px solid rgba(255,255,255,.82);
+      border-radius:32px;
+      box-shadow:var(--shadow);
+      padding:22px;
+      margin-bottom:18px;
+    }
+
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:16px;
+      margin-bottom:14px;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      padding:8px 12px;
+      border-radius:999px;
+      background:var(--purple-soft);
+      color:var(--purple);
+      font-size:12px;
+      font-weight:700;
+      letter-spacing:.4px;
+      text-transform:uppercase;
+      margin-bottom:10px;
+    }
+
+    h1{
+      margin:0 0 8px;
+      font-size:32px;
+      line-height:1.05;
+    }
+
+    .sub{
+      margin:0;
+      color:var(--muted);
+      font-size:15px;
+      line-height:1.55;
+      max-width:720px;
+    }
+
+    .icon-btn{
+      width:48px;
+      height:48px;
+      border:none;
+      border-radius:18px;
+      background:#fff;
+      box-shadow:var(--shadow);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      font-size:20px;
+      color:var(--text);
+      flex:0 0 auto;
+    }
+
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:12px;
+      margin-top:18px;
+    }
+
+    .stat{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:22px;
+      padding:16px;
+      box-shadow:var(--shadow);
+    }
+
+    .stat.good{
+      background:var(--green-soft);
+      border-color:#d8f3e1;
+    }
+
+    .stat.warn{
+      background:var(--orange-soft);
+      border-color:#f8e0c5;
+    }
+
+    .stat.purple{
+      background:var(--purple-soft);
+      border-color:#eadfff;
+    }
+
+    .stat.red{
+      background:var(--red-soft);
+      border-color:#f0c8c4;
+    }
+
+    .stat .k{
+      font-size:12px;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.4px;
+      margin-bottom:8px;
+      font-weight:700;
+    }
+
+    .stat .v{
+      font-size:28px;
+      font-weight:800;
+      line-height:1;
+    }
+
+    .main{
+      display:grid;
+      grid-template-columns:minmax(0,1fr);
+      gap:18px;
+    }
+
+    .section-card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:28px;
+      box-shadow:var(--shadow);
+      padding:18px;
+    }
+
+    .section-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-bottom:14px;
+    }
+
+    .section-top h2{
+      margin:0;
+      font-size:21px;
+    }
+
+    .section-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .pill-btn{
+      border:none;
+      border-radius:999px;
+      padding:10px 14px;
+      font-size:13px;
+      font-weight:700;
+      cursor:pointer;
+      background:#fff;
+      border:1px solid var(--line);
+      color:var(--text);
+      transition:.15s ease;
+    }
+
+    .pill-btn.active{
+      background:var(--blue-soft);
+      color:var(--blue);
+      border-color:#cfe0ff;
+    }
+
+    .task-list,
+    .mini-task-list,
+    .log-list{
+      display:grid;
+      gap:12px;
+    }
+
+    .task{
+      border:1px solid var(--line);
+      border-radius:22px;
+      padding:16px;
+      background:#fff;
+      transition:transform .15s ease, box-shadow .15s ease;
+      cursor:pointer;
+    }
+
+    .task:hover{
+      transform:translateY(-2px);
+      box-shadow:var(--shadow);
+    }
+
+    .task.compact{
+      padding:14px;
+      border-radius:20px;
+    }
+
+    .task-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      margin-bottom:8px;
+    }
+
+    .task-name{
+      font-size:16px;
+      font-weight:800;
+      margin-bottom:4px;
+      line-height:1.3;
+    }
+
+    .task.compact .task-name{
+      font-size:15px;
+    }
+
+    .task-meta{
+      font-size:13px;
+      color:var(--muted);
+      line-height:1.45;
+    }
+
+    .points{
+      padding:8px 12px;
+      border-radius:999px;
+      background:var(--blue-soft);
+      color:var(--blue);
+      font-size:13px;
+      font-weight:800;
+      white-space:nowrap;
+    }
+
+    .tags{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:10px;
+    }
+
+    .tag{
+      padding:7px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:700;
+      border:1px solid var(--line);
+      background:#fff;
+    }
+
+    .tag.open{
+      background:var(--blue-soft);
+      color:var(--blue);
+      border-color:#cfe0ff;
+    }
+
+    .tag.pending{
+      background:var(--orange-soft);
+      color:var(--orange);
+      border-color:#f7ddbd;
+    }
+
+    .tag.approved{
+      background:var(--green-soft);
+      color:var(--green);
+      border-color:#d8f3e1;
+    }
+
+    .tag.declined{
+      background:var(--red-soft);
+      color:var(--red);
+      border-color:#f0c8c4;
+    }
+
+    .age-pill{
+      display:inline-flex;
+      align-items:center;
+      padding:7px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:700;
+      background:#f8fbff;
+      color:var(--muted);
+      border:1px solid var(--line);
+    }
+
+    .age-pill.stale{
+      background:var(--orange-soft);
+      color:var(--orange);
+      border-color:#f7ddbd;
+    }
+
+    .age-pill.old{
+      background:var(--red-soft);
+      color:var(--red);
+      border-color:#f0c8c4;
+    }
+
+    .empty{
+      padding:18px;
+      border:1px dashed #d7dfed;
+      border-radius:18px;
+      color:var(--muted);
+      text-align:center;
+      background:#fbfdff;
+    }
+
+    .overlay{
+      position:fixed;
+      inset:0;
+      background:rgba(15,23,42,.26);
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .22s ease;
+      z-index:40;
+    }
+
+    .overlay.show{
+      opacity:1;
+      pointer-events:auto;
+    }
+
+    .drawer{
+      position:fixed;
+      top:0;
+      right:0;
+      width:min(390px,92vw);
+      height:100vh;
+      background:#fff;
+      box-shadow:var(--drawer-shadow);
+      padding:22px;
+      transform:translateX(100%);
+      transition:transform .24s ease;
+      z-index:50;
+      overflow:auto;
+    }
+
+    .drawer.show{
+      transform:translateX(0);
+    }
+
+    .drawer-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      margin-bottom:14px;
+    }
+
+    .drawer-title{
+      margin:0;
+      font-size:22px;
+      line-height:1.1;
+    }
+
+    .drawer-sub{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.45;
+    }
+
+    .drawer-card{
+      border:1px solid var(--line);
+      border-radius:22px;
+      padding:16px;
+      background:#fff;
+      margin-bottom:14px;
+    }
+
+    .drawer-card h3{
+      margin:0 0 10px;
+      font-size:16px;
+    }
+
+    .drawer-card .mini{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.5;
+    }
+
+    .drawer-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:14px;
+    }
+
+    .drawer-btn{
+      border:none;
+      border-radius:14px;
+      padding:11px 13px;
+      background:var(--blue-soft);
+      color:var(--blue);
+      font-size:13px;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .log-item{
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:12px 14px;
+      background:#fff;
+    }
+
+    .log-main{
+      font-size:14px;
+      font-weight:700;
+      line-height:1.4;
+      margin-bottom:4px;
+    }
+
+    .log-sub{
+      font-size:13px;
+      color:var(--muted);
+    }
+
+    .sheet{
+      position:fixed;
+      left:0;
+      right:0;
+      bottom:0;
+      background:#fff;
+      border-top-left-radius:28px;
+      border-top-right-radius:28px;
+      box-shadow:var(--sheet-shadow);
+      padding:18px 18px calc(22px + var(--safe-bottom));
+      transform:translateY(105%);
+      transition:transform .24s ease;
+      z-index:55;
+      max-height:88vh;
+      overflow:auto;
+      overscroll-behavior:contain;
+    }
+
+    .sheet.show{
+      transform:translateY(0);
+    }
+
+    .sheet-handle{
+      width:56px;
+      height:6px;
+      border-radius:999px;
+      background:#dbe3f0;
+      margin:0 auto 16px;
+    }
+
+    .sheet-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      margin-bottom:14px;
+    }
+
+    .sheet-head h2{
+      margin:0;
+      font-size:22px;
+      line-height:1.1;
+    }
+
+    .sheet-head p{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.45;
+    }
+
+    .detail-box{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:24px;
+      padding:16px;
+    }
+
+    .detail-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:12px;
+      margin-top:14px;
+    }
+
+    .detail-item{
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:14px;
+      background:#fafcff;
+    }
+
+    .detail-k{
+      font-size:12px;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.4px;
+      margin-bottom:6px;
+      font-weight:700;
+    }
+
+    .detail-v{
+      font-size:15px;
+      font-weight:700;
+      line-height:1.4;
+      word-break:break-word;
+    }
+
+    .sheet-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:16px;
+    }
+
+    .primary{
+      border:none;
+      border-radius:16px;
+      padding:14px 16px;
+      background:var(--blue);
+      color:#fff;
+      font-size:14px;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .secondary{
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:14px 16px;
+      background:#fff;
+      color:var(--text);
+      font-size:14px;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .success{
+      border:none;
+      border-radius:16px;
+      padding:14px 16px;
+      background:var(--green-soft);
+      color:var(--green);
+      font-size:14px;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    @media (max-width:820px){
+      .stats{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+      }
+
+      .detail-grid{
+        grid-template-columns:1fr;
+      }
+
+      h1{
+        font-size:27px;
+      }
+
+      body{
+        padding:14px;
+      }
+
+      .sheet{
+        border-top-left-radius:26px;
+        border-top-right-radius:26px;
+      }
+
+      .icon-btn{
+        width:46px;
+        height:46px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <div class="topbar">
+        <div>
+          <div class="pill">Participant view</div>
+          <h1>Jamie dashboard</h1>
+          <p class="sub">Current open tasks first. Declined items have their own visible status now.</p>
+        </div>
+
+        <button class="icon-btn" id="openDrawerBtn" aria-label="Open side menu">☰</button>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="k">Open</div>
+          <div class="v" id="statOpen">0</div>
+        </div>
+        <div class="stat warn">
+          <div class="k">Pending</div>
+          <div class="v" id="statPending">0</div>
+        </div>
+        <div class="stat good">
+          <div class="k">Approved</div>
+          <div class="v" id="statApproved">0</div>
+        </div>
+        <div class="stat red">
+          <div class="k">Declined</div>
+          <div class="v" id="statDeclined">0</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="main">
+      <div class="section-card">
+        <div class="section-top">
+          <h2>Current open tasks</h2>
+          <div class="section-actions">
+            <button class="pill-btn" id="refreshBtn">Refresh</button>
+          </div>
+        </div>
+
+        <div class="mini-task-list" id="currentOpenList"></div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-top">
+          <h2>All tasks</h2>
+          <div class="section-actions">
+            <button class="pill-btn" data-filter="all">All</button>
+            <button class="pill-btn active" data-filter="open">Open</button>
+            <button class="pill-btn" data-filter="pending">Pending</button>
+            <button class="pill-btn" data-filter="approved">Approved</button>
+            <button class="pill-btn" data-filter="declined">Declined</button>
+          </div>
+        </div>
+
+        <div class="task-list" id="taskList"></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="overlay" id="overlay"></div>
+
+  <aside class="drawer" id="drawer">
+    <div class="drawer-top">
+      <div>
+        <h2 class="drawer-title">Side panel</h2>
+        <p class="drawer-sub">Info, refresh actions, and the activity log all live here now.</p>
+      </div>
+      <button class="icon-btn" id="closeDrawerBtn" aria-label="Close side menu">✕</button>
+    </div>
+
+    <div class="drawer-card">
+      <h3>Session</h3>
+      <div class="mini"><strong>Participant:</strong> Jamie</div>
+      <div class="mini"><strong>Controller:</strong> Dylan</div>
+      <div class="mini"><strong>Storage key:</strong> dylan_jamie_shared_dashboard</div>
+    </div>
+
+    <div class="drawer-actions">
+      <button class="drawer-btn" id="drawerRefreshBtn">Refresh data</button>
+      <button class="drawer-btn" id="drawerSyncBtn">Manual sync</button>
+    </div>
+
+    <div class="drawer-card">
+      <h3>Activity log</h3>
+      <div class="log-list" id="logList"></div>
+    </div>
+  </aside>
+
+  <section class="sheet" id="taskSheet">
+    <div class="sheet-handle"></div>
+
+    <div class="sheet-head">
+      <div>
+        <h2 id="sheetTaskTitle">Task</h2>
+        <p id="sheetTaskSub">Tap the action that fits the current state.</p>
+      </div>
+      <button class="icon-btn" id="closeTaskSheetBtn" aria-label="Close task sheet">✕</button>
+    </div>
+
+    <div class="detail-box">
+      <div class="detail-grid">
+        <div class="detail-item">
+          <div class="detail-k">Status</div>
+          <div class="detail-v" id="detailStatus">open</div>
+        </div>
+
+        <div class="detail-item">
+          <div class="detail-k">Points</div>
+          <div class="detail-v" id="detailPoints">0 pts</div>
+        </div>
+
+        <div class="detail-item">
+          <div class="detail-k">Category</div>
+          <div class="detail-v" id="detailCategory">household</div>
+        </div>
+
+        <div class="detail-item">
+          <div class="detail-k">Assigned</div>
+          <div class="detail-v" id="detailCreated">today</div>
+        </div>
+
+        <div class="detail-item" style="grid-column:1 / -1;">
+          <div class="detail-k">Time since assigned</div>
+          <div class="detail-v" id="detailAge">just now</div>
+        </div>
+
+        <div class="detail-item" style="grid-column:1 / -1;">
+          <div class="detail-k">Note</div>
+          <div class="detail-v" id="detailNote">No note.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sheet-actions" id="taskActionRow"></div>
+  </section>
+
+  <script>
+    const STORAGE_KEY = "dylan_jamie_shared_dashboard";
+
+    const APP_CONFIG = {
+      sessionId: "dylan-jamie-001",
+      controllerName: "Dylan",
+      participantName: "Jamie"
+    };
+
+    let appState = loadState();
+    let currentFilter = "open";
+    let activeTaskId = null;
+
+    const statOpen = document.getElementById("statOpen");
+    const statPending = document.getElementById("statPending");
+    const statApproved = document.getElementById("statApproved");
+    const statDeclined = document.getElementById("statDeclined");
+
+    const taskList = document.getElementById("taskList");
+    const currentOpenList = document.getElementById("currentOpenList");
+    const logList = document.getElementById("logList");
+
+    const overlay = document.getElementById("overlay");
+    const drawer = document.getElementById("drawer");
+    const taskSheet = document.getElementById("taskSheet");
+
+    const sheetTaskTitle = document.getElementById("sheetTaskTitle");
+    const sheetTaskSub = document.getElementById("sheetTaskSub");
+    const detailStatus = document.getElementById("detailStatus");
+    const detailPoints = document.getElementById("detailPoints");
+    const detailCategory = document.getElementById("detailCategory");
+    const detailCreated = document.getElementById("detailCreated");
+    const detailAge = document.getElementById("detailAge");
+    const detailNote = document.getElementById("detailNote");
+    const taskActionRow = document.getElementById("taskActionRow");
+
+    function makeDefaultState() {
+      return {
+        sessionId: APP_CONFIG.sessionId,
+        controllerName: APP_CONFIG.controllerName,
+        participantName: APP_CONFIG.participantName,
+        tasks: [],
+        activityLog: [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+    }
+
+    function safeReadJSON(key, fallback) {
+      try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return fallback;
+        return JSON.parse(raw);
+      } catch (err) {
+        console.error("read error", err);
+        return fallback;
+      }
+    }
+
+    function loadState() {
+      const fallback = makeDefaultState();
+      const state = safeReadJSON(STORAGE_KEY, fallback);
+
+      if (!state || typeof state !== "object") return fallback;
+      if (!Array.isArray(state.tasks)) state.tasks = [];
+      if (!Array.isArray(state.activityLog)) state.activityLog = [];
+      if (!state.sessionId) state.sessionId = APP_CONFIG.sessionId;
+      if (!state.controllerName) state.controllerName = APP_CONFIG.controllerName;
+      if (!state.participantName) state.participantName = APP_CONFIG.participantName;
+
+      return state;
+    }
+
+    function saveState() {
+      appState.updatedAt = new Date().toISOString();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+    }
+
+    function makeId() {
+      return "id_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8);
+    }
+
+    function formatNow() {
+      return new Date().toLocaleString();
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function parseDate(value) {
+      if (!value) return null;
+      const d = new Date(value);
+      return Number.isNaN(d.getTime()) ? null : d;
+    }
+
+    function getAgeText(value) {
+      const d = parseDate(value);
+      if (!d) return "unknown";
+      const diffMs = Date.now() - d.getTime();
+      const mins = Math.max(0, Math.floor(diffMs / 60000));
+      if (mins < 1) return "just now";
+      if (mins < 60) return `${mins}m ago`;
+      const hours = Math.floor(mins / 60);
+      if (hours < 24) return `${hours}h ago`;
+      const days = Math.floor(hours / 24);
+      return `${days}d ago`;
+    }
+
+    function getAgeClass(value) {
+      const d = parseDate(value);
+      if (!d) return "";
+      const diffHours = (Date.now() - d.getTime()) / 3600000;
+      if (diffHours >= 48) return "old";
+      if (diffHours >= 24) return "stale";
+      return "";
+    }
+
+    function addLog(message, sub = "") {
+      appState.activityLog.unshift({
+        id: makeId(),
+        message,
+        sub,
+        createdAt: formatNow()
+      });
+
+      appState.activityLog = appState.activityLog.slice(0, 50);
+      saveState();
+      renderLog();
+    }
+
+    function renderStats() {
+      const openTasks = appState.tasks.filter(task => task.status === "open");
+      const pendingTasks = appState.tasks.filter(task => task.status === "pending");
+      const approvedTasks = appState.tasks.filter(task => task.status === "approved");
+      const declinedTasks = appState.tasks.filter(task => task.status === "declined");
+
+      statOpen.textContent = openTasks.length;
+      statPending.textContent = pendingTasks.length;
+      statApproved.textContent = approvedTasks.length;
+      statDeclined.textContent = declinedTasks.length;
+    }
+
+    function getFilteredTasks() {
+      if (currentFilter === "all") return appState.tasks;
+      return appState.tasks.filter(task => task.status === currentFilter);
+    }
+
+    function renderCurrentOpenTasks() {
+      const openTasks = appState.tasks.filter(task => task.status === "open");
+
+      if (!openTasks.length) {
+        currentOpenList.innerHTML = `
+          <div class="empty">
+            No open tasks right now.
+          </div>
+        `;
+        return;
+      }
+
+      currentOpenList.innerHTML = openTasks.map(task => {
+        const ageText = getAgeText(task.createdAt);
+        const ageClass = getAgeClass(task.createdAt);
+        return `
+          <article class="task compact" data-open-id="${task.id}">
+            <div class="task-top">
+              <div>
+                <div class="task-name">${escapeHtml(task.title)}</div>
+                <div class="task-meta">Category: ${escapeHtml(task.category)}<br>Assigned: ${escapeHtml(task.createdAt || "unknown")}</div>
+              </div>
+              <div class="points">${Number(task.points || 0)} pts</div>
+            </div>
+            <div class="tags">
+              <span class="tag open">open</span>
+              <span class="tag">${escapeHtml(task.category)}</span>
+              <span class="age-pill ${ageClass}">${escapeHtml(ageText)}</span>
+            </div>
+          </article>
+        `;
+      }).join("");
+
+      document.querySelectorAll("[data-open-id]").forEach(card => {
+        card.addEventListener("click", () => {
+          openTaskSheet(card.dataset.openId);
+        });
+      });
+    }
+
+    function renderTasks() {
+      const filteredTasks = getFilteredTasks();
+
+      if (!filteredTasks.length) {
+        taskList.innerHTML = `
+          <div class="empty">
+            No tasks in this view.
+          </div>
+        `;
+        renderStats();
+        return;
+      }
+
+      taskList.innerHTML = filteredTasks.map(task => {
+        const statusClass = task.status === "approved"
+          ? "approved"
+          : task.status === "pending"
+          ? "pending"
+          : task.status === "declined"
+          ? "declined"
+          : "open";
+
+        const ageText = getAgeText(task.createdAt);
+        const ageClass = getAgeClass(task.createdAt);
+
+        return `
+          <article class="task" data-id="${task.id}">
+            <div class="task-top">
+              <div>
+                <div class="task-name">${escapeHtml(task.title)}</div>
+                <div class="task-meta">Category: ${escapeHtml(task.category)}<br>Assigned: ${escapeHtml(task.createdAt || "unknown")}</div>
+              </div>
+              <div class="points">${Number(task.points || 0)} pts</div>
+            </div>
+            <div class="tags">
+              <span class="tag ${statusClass}">${escapeHtml(task.status)}</span>
+              <span class="tag">${escapeHtml(task.category)}</span>
+              <span class="age-pill ${ageClass}">${escapeHtml(ageText)}</span>
+            </div>
+          </article>
+        `;
+      }).join("");
+
+      document.querySelectorAll(".task[data-id]").forEach(card => {
+        card.addEventListener("click", () => {
+          openTaskSheet(card.dataset.id);
+        });
+      });
+
+      renderStats();
+    }
+
+    function renderLog() {
+      if (!appState.activityLog.length) {
+        logList.innerHTML = `
+          <div class="empty">
+            No activity yet.
+          </div>
+        `;
+        return;
+      }
+
+      logList.innerHTML = appState.activityLog.map(item => `
+        <div class="log-item">
+          <div class="log-main">${escapeHtml(item.message)}</div>
+          <div class="log-sub">${escapeHtml(item.sub || "")}${item.sub ? " • " : ""}${escapeHtml(item.createdAt)}</div>
+        </div>
+      `).join("");
+    }
+
+    function closeAllPanels() {
+      overlay.classList.remove("show");
+      drawer.classList.remove("show");
+      taskSheet.classList.remove("show");
+    }
+
+    function showOverlay() {
+      overlay.classList.add("show");
+    }
+
+    function openDrawer() {
+      closeAllPanels();
+      showOverlay();
+      drawer.classList.add("show");
+    }
+
+    function openTaskSheet(taskId) {
+      const task = appState.tasks.find(t => t.id === taskId);
+      if (!task) return;
+
+      activeTaskId = taskId;
+
+      sheetTaskTitle.textContent = task.title || "Task";
+      detailStatus.textContent = task.status || "open";
+      detailPoints.textContent = `${Number(task.points || 0)} pts`;
+      detailCategory.textContent = task.category || "household";
+      detailCreated.textContent = task.createdAt || "Unknown";
+      detailAge.textContent = getAgeText(task.createdAt);
+      detailNote.textContent = task.note?.trim() || "No note.";
+
+      taskActionRow.innerHTML = "";
+
+      if (task.status === "open") {
+        sheetTaskSub.textContent = "This task is ready to submit.";
+        taskActionRow.innerHTML = `
+          <button class="primary" id="submitTaskBtn">Submit complete</button>
+        `;
+        document.getElementById("submitTaskBtn").addEventListener("click", submitActiveTask);
+      } else if (task.status === "pending") {
+        sheetTaskSub.textContent = "This task is waiting for controller review.";
+        taskActionRow.innerHTML = `
+          <button class="secondary" id="undoTaskBtn">Undo to open</button>
+        `;
+        document.getElementById("undoTaskBtn").addEventListener("click", undoActiveTask);
+      } else if (task.status === "declined") {
+        sheetTaskSub.textContent = "This task was declined. You can reopen it and try again.";
+        taskActionRow.innerHTML = `
+          <button class="secondary" id="reopenDeclinedBtn">Reopen</button>
+        `;
+        document.getElementById("reopenDeclinedBtn").addEventListener("click", reopenDeclinedTask);
+      } else {
+        sheetTaskSub.textContent = "This task has already been approved.";
+        taskActionRow.innerHTML = `
+          <button class="success" type="button" disabled>Approved</button>
+        `;
+      }
+
+      closeAllPanels();
+      showOverlay();
+      taskSheet.classList.add("show");
+    }
+
+    function submitActiveTask() {
+      if (!activeTaskId) return;
+      const task = appState.tasks.find(t => t.id === activeTaskId);
+      if (!task || task.status !== "open") return;
+
+      task.status = "pending";
+      saveState();
+      renderCurrentOpenTasks();
+      renderTasks();
+      addLog(`Task submitted: ${task.title}`, `${task.points} pts waiting for review`);
+      closeAllPanels();
+    }
+
+    function undoActiveTask() {
+      if (!activeTaskId) return;
+      const task = appState.tasks.find(t => t.id === activeTaskId);
+      if (!task || task.status !== "pending") return;
+
+      task.status = "open";
+      saveState();
+      renderCurrentOpenTasks();
+      renderTasks();
+      addLog(`Submission undone: ${task.title}`, `Task returned to open`);
+      closeAllPanels();
+    }
+
+    function reopenDeclinedTask() {
+      if (!activeTaskId) return;
+      const task = appState.tasks.find(t => t.id === activeTaskId);
+      if (!task || task.status !== "declined") return;
+
+      task.status = "open";
+      saveState();
+      renderCurrentOpenTasks();
+      renderTasks();
+      addLog(`Declined task reopened: ${task.title}`, `Task returned to open`);
+      closeAllPanels();
+    }
+
+    function refreshFromStorage() {
+      appState = loadState();
+      renderCurrentOpenTasks();
+      renderTasks();
+      renderLog();
+    }
+
+    document.querySelectorAll(".pill-btn[data-filter]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        currentFilter = btn.dataset.filter;
+        document.querySelectorAll(".pill-btn[data-filter]").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        renderTasks();
+      });
+    });
+
+    document.getElementById("openDrawerBtn").addEventListener("click", openDrawer);
+    document.getElementById("closeDrawerBtn").addEventListener("click", closeAllPanels);
+    document.getElementById("closeTaskSheetBtn").addEventListener("click", closeAllPanels);
+    document.getElementById("refreshBtn").addEventListener("click", refreshFromStorage);
+    document.getElementById("drawerRefreshBtn")?.addEventListener("click", refreshFromStorage);
+    document.getElementById("drawerSyncBtn")?.addEventListener("click", refreshFromStorage);
+    overlay.addEventListener("click", closeAllPanels);
+
+    window.addEventListener("storage", (event) => {
+      if (event.key === STORAGE_KEY) {
+        refreshFromStorage();
+      }
+    });
+
+    renderCurrentOpenTasks();
+    renderTasks();
+    renderLog();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Controller Dashboard</title>
+  <style>
+    :root{
+      --bg1:#f8fbff;
+      --bg2:#eef4ff;
+      --card:#ffffff;
+      --line:#e8edf5;
+      --text:#182033;
+      --muted:#6b7280;
+      --blue:#2563eb;
+      --blue-soft:#edf4ff;
+      --green:#127a45;
+      --green-soft:#ecfdf3;
+      --orange:#b54708;
+      --orange-soft:#fff7ed;
+      --red:#b42318;
+      --red-soft:#fef3f2;
+      --purple:#7c3aed;
+      --purple-soft:#f5f3ff;
+      --shadow:0 18px 45px rgba(15,23,42,.08);
+      --sheet-shadow:0 -18px 40px rgba(15,23,42,.14);
+      --drawer-shadow:-10px 0 32px rgba(15,23,42,.12);
+      --safe-bottom:env(safe-area-inset-bottom, 0px);
+    }
+
+    *{
+      box-sizing:border-box;
+      -webkit-tap-highlight-color:transparent;
+    }
+
+    html,body{
+      margin:0;
+      padding:0;
+      min-height:100%;
+      font-family:Arial, Helvetica, sans-serif;
+      color:var(--text);
+      background:radial-gradient(circle at top left, #ffffff 0%, #f8fbff 35%, #eef4ff 100%);
+    }
+
+    body{
+      padding:18px;
+      overflow-x:hidden;
+    }
+
+    button,input,select,textarea{
+      font:inherit;
+    }
+
+    .wrap{
+      width:min(1150px,96%);
+      margin:0 auto;
+    }
+
+    .hero{
+      position:relative;
+      background:rgba(255,255,255,.84);
+      backdrop-filter:blur(12px);
+      border:1px solid rgba(255,255,255,.82);
+      border-radius:32px;
+      box-shadow:var(--shadow);
+      padding:22px;
+      margin-bottom:18px;
+    }
+
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:16px;
+      margin-bottom:14px;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      padding:8px 12px;
+      border-radius:999px;
+      background:var(--blue-soft);
+      color:var(--blue);
+      font-size:12px;
+      font-weight:700;
+      letter-spacing:.4px;
+      text-transform:uppercase;
+      margin-bottom:10px;
+    }
+
+    h1{
+      margin:0 0 8px;
+      font-size:32px;
+      line-height:1.05;
+    }
+
+    .sub{
+      margin:0;
+      color:var(--muted);
+      font-size:15px;
+      line-height:1.55;
+      max-width:720px;
+    }
+
+    .icon-btn{
+      width:48px;
+      height:48px;
+      border:none;
+      border-radius:18px;
+      background:#fff;
+      box-shadow:var(--shadow);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      font-size:20px;
+      color:var(--text);
+      flex:0 0 auto;
+    }
+
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:12px;
+      margin-top:18px;
+    }
+
+    .stat{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:22px;
+      padding:16px;
+      box-shadow:var(--shadow);
+    }
+
+    .stat.good{
+      background:var(--green-soft);
+      border-color:#d8f3e1;
+    }
+
+    .stat.warn{
+      background:var(--orange-soft);
+      border-color:#f8e0c5;
+    }
+
+    .stat.purple{
+      background:var(--purple-soft);
+      border-color:#eadfff;
+    }
+
+    .stat .k{
+      font-size:12px;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.4px;
+      margin-bottom:8px;
+      font-weight:700;
+    }
+
+    .stat .v{
+      font-size:28px;
+      font-weight:800;
+      line-height:1;
+    }
+
+    .main{
+      display:grid;
+      grid-template-columns:minmax(0,1fr);
+      gap:18px;
+    }
+
+    .section-card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:28px;
+      box-shadow:var(--shadow);
+      padding:18px;
+    }
+
+    .section-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-bottom:14px;
+    }
+
+    .section-top h2{
+      margin:0;
+      font-size:21px;
+    }
+
+    .section-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .pill-btn{
+      border:none;
+      border-radius:999px;
+      padding:10px 14px;
+      font-size:13px;
+      font-weight:700;
+      cursor:pointer;
+      background:#fff;
+      border:1px solid var(--line);
+      color:var(--text);
+      transition:.15s ease;
+    }
+
+    .pill-btn.active{
+      background:var(--blue-soft);
+      color:var(--blue);
+      border-color:#cfe0ff;
+    }
+
+    .task-list,
+    .log-list{
+      display:grid;
+      gap:12px;
+    }
+
+    .task{
+      border:1px solid var(--line);
+      border-radius:22px;
+      padding:16px;
+      background:#fff;
+      transition:transform .15s ease, box-shadow .15s ease;
+      cursor:pointer;
+    }
+
+    .task:hover{
+      transform:translateY(-2px);
+      box-shadow:var(--shadow);
+    }
+
+    .task-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      margin-bottom:8px;
+    }
+
+    .task-name{
+      font-size:16px;
+      font-weight:800;
+      margin-bottom:4px;
+      line-height:1.3;
+    }
+
+    .task-meta{
+      font-size:13px;
+      color:var(--muted);
+      line-height:1.45;
+    }
+
+    .points{
+      padding:8px 12px;
+      border-radius:999px;
+      background:var(--blue-soft);
+      color:var(--blue);
+      font-size:13px;
+      font-weight:800;
+      white-space:nowrap;
+    }
+
+    .tags{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:10px;
+    }
+
+    .tag{
+      padding:7px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:700;
+      border:1px solid var(--line);
+      background:#fff;
+    }
+
+    .tag.open{
+      background:var(--blue-soft);
+      color:var(--blue);
+      border-color:#cfe0ff;
+    }
+
+    .tag.pending{
+      background:var(--orange-soft);
+      color:var(--orange);
+      border-color:#f7ddbd;
+    }
+
+    .tag.approved{
+      background:var(--green-soft);
+      color:var(--green);
+      border-color:#d8f3e1;
+    }
+
+    .tag.declined{
+      background:var(--red-soft);
+      color:var(--red);
+      border-color:#f0c8c4;
+    }
+
+    .empty{
+      padding:18px;
+      border:1px dashed #d7dfed;
+      border-radius:18px;
+      color:var(--muted);
+      text-align:center;
+      background:#fbfdff;
+    }
+
+    .log-item{
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:12px 14px;
+      background:#fff;
+    }
+
+    .log-main{
+      font-size:14px;
+      font-weight:700;
+      line-height:1.4;
+      margin-bottom:4px;
+    }
+
+    .log-sub{
+      font-size:13px;
+      color:var(--muted);
+    }
+
+    .fab{
+      position:fixed;
+      right:20px;
+      bottom:calc(20px + var(--safe-bottom));
+      width:64px;
+      height:64px;
+      border:none;
+      border-radius:24px;
+      background:var(--blue);
+      color:#fff;
+      font-size:34px;
+      line-height:1;
+      box-shadow:0 20px 34px rgba(37,99,235,.28);
+      cursor:pointer;
+      z-index:20;
+      transition:transform .16s ease, box-shadow .16s ease;
+    }
+
+    .fab:active{
+      transform:scale(.96);
+    }
+
+    .overlay{
+      position:fixed;
+      inset:0;
+      background:rgba(15,23,42,.26);
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .22s ease;
+      z-index:40;
+    }
+
+    .overlay.show{
+      opacity:1;
+      pointer-events:auto;
+    }
+
+    .drawer{
+      position:fixed;
+      top:0;
+      right:0;
+      width:min(390px,90vw);
+      height:100vh;
+      background:#fff;
+      box-shadow:var(--drawer-shadow);
+      padding:22px;
+      transform:translateX(100%);
+      transition:transform .24s ease;
+      z-index:50;
+      overflow:auto;
+    }
+
+    .drawer.show{
+      transform:translateX(0);
+    }
+
+    .sheet{
+      position:fixed;
+      left:0;
+      right:0;
+      bottom:0;
+      background:#fff;
+      border-top-left-radius:28px;
+      border-top-right-radius:28px;
+      box-shadow:var(--sheet-shadow);
+      padding:18px 18px calc(22px + var(--safe-bottom));
+      transform:translateY(105%);
+      transition:transform .24s ease;
+      z-index:55;
+      max-height:88vh;
+      overflow:auto;
+      overscroll-behavior:contain;
+    }
+
+    .sheet.show{
+      transform:translateY(0);
+    }
+
+    .sheet-handle{
+      width:56px;
+      height:6px;
+      border-radius:999px;
+      background:#dbe3f0;
+      margin:0 auto 16px;
+    }
+
+    .menu-list{
+      display:grid;
+      gap:10px;
+      margin-top:16px;
+    }
+
+    .menu-btn{
+      text-align:left;
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:18px;
+      padding:14px;
+      font-size:14px;
+      font-weight:700;
+      cursor:pointer;
+    }
+
+    .info-box{
+      margin-top:14px;
+      padding:14px;
+      border-radius:18px;
+      background:#f8fbff;
+      border:1px solid var(--line);
+      font-size:14px;
+      color:var(--muted);
+      line-height:1.45;
+    }
+
+    .field-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:12px;
+    }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      margin-bottom:12px;
+    }
+
+    .field.full{
+      grid-column:1 / -1;
+    }
+
+    .sheet-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      margin-bottom:14px;
+    }
+
+    .sheet-head h2{
+      margin:0;
+      font-size:22px;
+      line-height:1.1;
+    }
+
+    .sheet-head p{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.45;
+    }
+
+    label{
+      font-size:13px;
+      font-weight:700;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    textarea,
+    select{
+      width:100%;
+      padding:14px;
+      border-radius:18px;
+      border:1px solid var(--line);
+      background:#fff;
+      font-size:16px;
+      color:var(--text);
+      outline:none;
+      appearance:none;
+    }
+
+    textarea{
+      min-height:105px;
+      resize:vertical;
+    }
+
+    .quick-add-shell{
+      width:min(460px, 100%);
+      margin:0 auto;
+    }
+
+    .quick-add-main{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:24px;
+      padding:14px;
+    }
+
+    .quick-add-row{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 110px;
+      gap:12px;
+      align-items:end;
+    }
+
+    .link-btn{
+      border:none;
+      background:transparent;
+      color:var(--blue);
+      font-size:14px;
+      font-weight:700;
+      padding:8px 4px;
+      cursor:pointer;
+      text-align:left;
+    }
+
+    .more-fields{
+      display:none;
+      padding-top:10px;
+    }
+
+    .more-fields.show{
+      display:block;
+      animation:fadeDown .18s ease;
+    }
+
+    .sheet-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:16px;
+    }
+
+    .primary{
+      border:none;
+      border-radius:16px;
+      padding:14px 16px;
+      background:var(--blue);
+      color:#fff;
+      font-size:14px;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .secondary{
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:14px 16px;
+      background:#fff;
+      color:var(--text);
+      font-size:14px;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .success{
+      border:none;
+      border-radius:16px;
+      padding:14px 16px;
+      background:var(--green-soft);
+      color:var(--green);
+      font-size:14px;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .danger{
+      border:none;
+      border-radius:16px;
+      padding:14px 16px;
+      background:var(--red-soft);
+      color:var(--red);
+      font-size:14px;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .detail-box{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:24px;
+      padding:16px;
+    }
+
+    .detail-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:12px;
+      margin-top:14px;
+    }
+
+    .detail-item{
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:14px;
+      background:#fafcff;
+    }
+
+    .detail-k{
+      font-size:12px;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.4px;
+      margin-bottom:6px;
+      font-weight:700;
+    }
+
+    .detail-v{
+      font-size:15px;
+      font-weight:700;
+      line-height:1.4;
+      word-break:break-word;
+    }
+
+    #logSection{
+      display:none;
+    }
+
+    @keyframes fadeDown{
+      from{
+        opacity:0;
+        transform:translateY(-6px);
+      }
+      to{
+        opacity:1;
+        transform:translateY(0);
+      }
+    }
+
+    @media (max-width:820px){
+      .stats{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+      }
+
+      .field-grid,
+      .detail-grid{
+        grid-template-columns:1fr;
+      }
+
+      .quick-add-row{
+        grid-template-columns:1fr;
+      }
+
+      h1{
+        font-size:27px;
+      }
+
+      body{
+        padding:14px;
+      }
+
+      .sheet{
+        border-top-left-radius:26px;
+        border-top-right-radius:26px;
+        scroll-snap-align:end;
+      }
+
+      .fab{
+        right:16px;
+        bottom:calc(16px + var(--safe-bottom));
+      }
+
+      .icon-btn{
+        width:46px;
+        height:46px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <div class="topbar">
+        <div>
+          <div class="pill">Controller view</div>
+          <h1>Dylan dashboard</h1>
+          <p class="sub">Queue first. Pending reviews can be accepted or declined. Decline reopens the task on the participant side.</p>
+        </div>
+
+        <button class="icon-btn" id="openDrawerBtn" aria-label="Open tools menu">☰</button>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="k">Open</div>
+          <div class="v" id="statOpen">0</div>
+        </div>
+        <div class="stat warn">
+          <div class="k">Pending</div>
+          <div class="v" id="statPending">0</div>
+        </div>
+        <div class="stat good">
+          <div class="k">Approved</div>
+          <div class="v" id="statApproved">0</div>
+        </div>
+        <div class="stat purple">
+          <div class="k">Points</div>
+          <div class="v" id="statPoints">0</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="main">
+      <div class="section-card">
+        <div class="section-top">
+          <h2>Tasks</h2>
+          <div class="section-actions">
+            <button class="pill-btn active" data-filter="queue">Queue</button>
+            <button class="pill-btn" data-filter="approved">Approved</button>
+            <button class="pill-btn" data-filter="declined">Declined history</button>
+          </div>
+        </div>
+
+        <div class="task-list" id="taskList"></div>
+      </div>
+
+      <div class="section-card" id="logSection">
+        <div class="section-top">
+          <h2>Activity log</h2>
+          <div class="section-actions">
+            <button class="pill-btn" id="refreshBtn">Refresh</button>
+            <button class="pill-btn" id="hideLogBtn">Hide</button>
+          </div>
+        </div>
+
+        <div class="log-list" id="logList"></div>
+      </div>
+    </section>
+  </div>
+
+  <button class="fab" id="openAddBtn" aria-label="Add task">+</button>
+
+  <div class="overlay" id="overlay"></div>
+
+  <aside class="drawer" id="drawer">
+    <div class="section-top">
+      <h2>Session tools</h2>
+      <button class="icon-btn" id="closeDrawerBtn" aria-label="Close tools menu">✕</button>
+    </div>
+
+    <div class="menu-list">
+      <button class="menu-btn" id="toggleLogBtn">Show activity log</button>
+      <button class="menu-btn" id="clearLogBtn">Clear activity log</button>
+      <button class="menu-btn" id="resetAllBtn">Reset everything</button>
+    </div>
+
+    <div class="info-box">
+      Shared storage key: <strong>dylan_jamie_shared_dashboard</strong><br>
+      This page talks to <strong>participant.html</strong> through shared browser storage.
+    </div>
+  </aside>
+
+  <section class="sheet" id="taskSheet">
+    <div class="sheet-handle"></div>
+
+    <div class="sheet-head">
+      <div>
+        <h2 id="sheetTaskTitle">Review task</h2>
+        <p id="sheetTaskSub">Review state and choose an action.</p>
+      </div>
+      <button class="icon-btn" id="closeTaskSheetBtn" aria-label="Close task sheet">✕</button>
+    </div>
+
+    <div class="detail-box">
+      <div class="detail-grid">
+        <div class="detail-item">
+          <div class="detail-k">Status</div>
+          <div class="detail-v" id="detailStatus">open</div>
+        </div>
+
+        <div class="detail-item">
+          <div class="detail-k">Points</div>
+          <div class="detail-v" id="detailPoints">0 pts</div>
+        </div>
+
+        <div class="detail-item">
+          <div class="detail-k">Category</div>
+          <div class="detail-v" id="detailCategory">household</div>
+        </div>
+
+        <div class="detail-item">
+          <div class="detail-k">Created</div>
+          <div class="detail-v" id="detailCreated">today</div>
+        </div>
+
+        <div class="detail-item" style="grid-column:1 / -1;">
+          <div class="detail-k">Title</div>
+          <div class="detail-v" id="detailTitle">Task title</div>
+        </div>
+
+        <div class="detail-item" style="grid-column:1 / -1;">
+          <div class="detail-k">Note</div>
+          <div class="detail-v" id="detailNote">No note.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sheet-actions" id="taskActionRow"></div>
+  </section>
+
+  <section class="sheet" id="addSheet">
+    <div class="sheet-handle"></div>
+
+    <div class="quick-add-shell">
+      <div class="sheet-head">
+        <div>
+          <h2>New task</h2>
+          <p>Fast first. Extra details only if you need them.</p>
+        </div>
+        <button class="icon-btn" id="closeAddSheetBtn" aria-label="Close add sheet">✕</button>
+      </div>
+
+      <div class="quick-add-main">
+        <div class="quick-add-row">
+          <div class="field" style="margin-bottom:0;">
+            <label for="addTitle">Task title</label>
+            <input type="text" id="addTitle" placeholder="Ex: Clean kitchen" />
+          </div>
+
+          <div class="field" style="margin-bottom:0;">
+            <label for="addPoints">Points</label>
+            <input type="number" id="addPoints" value="25" />
+          </div>
+        </div>
+
+        <div class="sheet-actions" style="margin-top:14px;">
+          <button class="primary" id="createTaskBtn">Create task</button>
+          <button class="link-btn" id="toggleMoreBtn" type="button">More options</button>
+        </div>
+
+        <div class="more-fields" id="moreFields">
+          <div class="field-grid" style="margin-top:8px;">
+            <div class="field">
+              <label for="addCategory">Category</label>
+              <select id="addCategory">
+                <option value="household">household</option>
+                <option value="routine">routine</option>
+                <option value="communication">communication</option>
+                <option value="care">care</option>
+                <option value="shared goal">shared goal</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="addStatus">Starting status</label>
+              <select id="addStatus">
+                <option value="open">open</option>
+                <option value="pending">pending</option>
+                <option value="approved">approved</option>
+              </select>
+            </div>
+
+            <div class="field full">
+              <label for="addNote">Note</label>
+              <textarea id="addNote" placeholder="Optional note"></textarea>
+            </div>
+          </div>
+
+          <div class="sheet-actions">
+            <button class="secondary" id="clearAddBtn">Clear</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+  const STORAGE_KEY = "dylan_jamie_shared_dashboard";
+
+  const APP_CONFIG = {
+    sessionId: "dylan-jamie-001",
+    controllerName: "Dylan",
+    participantName: "Jamie"
+  };
+
+  let appState = loadState();
+  let currentFilter = "queue";
+  let activeTaskId = null;
+  let addExpanded = false;
+  let logVisible = false;
+
+  const statOpen = document.getElementById("statOpen");
+  const statPending = document.getElementById("statPending");
+  const statApproved = document.getElementById("statApproved");
+  const statPoints = document.getElementById("statPoints");
+
+  const taskList = document.getElementById("taskList");
+  const logList = document.getElementById("logList");
+  const logSection = document.getElementById("logSection");
+  const toggleLogBtn = document.getElementById("toggleLogBtn");
+
+  const overlay = document.getElementById("overlay");
+  const drawer = document.getElementById("drawer");
+  const taskSheet = document.getElementById("taskSheet");
+  const addSheet = document.getElementById("addSheet");
+  const moreFields = document.getElementById("moreFields");
+  const toggleMoreBtn = document.getElementById("toggleMoreBtn");
+
+  const addTitle = document.getElementById("addTitle");
+  const addPoints = document.getElementById("addPoints");
+  const addCategory = document.getElementById("addCategory");
+  const addStatus = document.getElementById("addStatus");
+  const addNote = document.getElementById("addNote");
+
+  const sheetTaskTitle = document.getElementById("sheetTaskTitle");
+  const sheetTaskSub = document.getElementById("sheetTaskSub");
+  const detailTitle = document.getElementById("detailTitle");
+  const detailStatus = document.getElementById("detailStatus");
+  const detailPoints = document.getElementById("detailPoints");
+  const detailCategory = document.getElementById("detailCategory");
+  const detailCreated = document.getElementById("detailCreated");
+  const detailNote = document.getElementById("detailNote");
+  const taskActionRow = document.getElementById("taskActionRow");
+
+  function makeDefaultState() {
+    return {
+      sessionId: APP_CONFIG.sessionId,
+      controllerName: APP_CONFIG.controllerName,
+      participantName: APP_CONFIG.participantName,
+      tasks: [],
+      activityLog: [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+  }
+
+  function safeReadJSON(key, fallback) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) return fallback;
+      return JSON.parse(raw);
+    } catch (err) {
+      console.error("read error", err);
+      return fallback;
+    }
+  }
+
+  function loadState() {
+    const fallback = makeDefaultState();
+    const state = safeReadJSON(STORAGE_KEY, fallback);
+
+    if (!state || typeof state !== "object") return fallback;
+    if (!Array.isArray(state.tasks)) state.tasks = [];
+    if (!Array.isArray(state.activityLog)) state.activityLog = [];
+    if (!state.sessionId) state.sessionId = APP_CONFIG.sessionId;
+    if (!state.controllerName) state.controllerName = APP_CONFIG.controllerName;
+    if (!state.participantName) state.participantName = APP_CONFIG.participantName;
+
+    return state;
+  }
+
+  function saveState() {
+    appState.updatedAt = new Date().toISOString();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+  }
+
+  function makeId() {
+    return "id_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8);
+  }
+
+  function formatNow() {
+    return new Date().toLocaleString();
+  }
+
+  function escapeHtml(str) {
+    return String(str)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function addLog(message, sub = "") {
+    appState.activityLog.unshift({
+      id: makeId(),
+      message,
+      sub,
+      createdAt: formatNow()
+    });
+
+    appState.activityLog = appState.activityLog.slice(0, 50);
+    saveState();
+    renderLog();
+  }
+
+  function renderStats() {
+    const openCount = appState.tasks.filter(task => task.status === "open").length;
+    const pendingCount = appState.tasks.filter(task => task.status === "pending").length;
+    const approvedTasks = appState.tasks.filter(task => task.status === "approved");
+    const approvedCount = approvedTasks.length;
+    const totalPoints = approvedTasks.reduce((sum, task) => sum + Number(task.points || 0), 0);
+
+    statOpen.textContent = openCount;
+    statPending.textContent = pendingCount;
+    statApproved.textContent = approvedCount;
+    statPoints.textContent = totalPoints;
+  }
+
+  function getFilteredTasks() {
+    if (currentFilter === "queue") {
+      return appState.tasks.filter(task =>
+        task.status === "open" || task.status === "pending"
+      );
+    }
+
+    if (currentFilter === "approved") {
+      return appState.tasks.filter(task => task.status === "approved");
+    }
+
+    if (currentFilter === "declined") {
+      return appState.tasks.filter(task => task.status === "declined");
+    }
+
+    return appState.tasks;
+  }
+
+  function renderTasks() {
+    const filteredTasks = getFilteredTasks();
+
+    if (!filteredTasks.length) {
+      taskList.innerHTML = `
+        <div class="empty">
+          No tasks in this view.
+        </div>
+      `;
+      renderStats();
+      return;
+    }
+
+    taskList.innerHTML = filteredTasks.map(task => {
+      const statusClass = task.status === "approved"
+        ? "approved"
+        : task.status === "pending"
+        ? "pending"
+        : task.status === "declined"
+        ? "declined"
+        : "open";
+
+      return `
+        <article class="task" data-id="${task.id}">
+          <div class="task-top">
+            <div>
+              <div class="task-name">${escapeHtml(task.title)}</div>
+              <div class="task-meta">Category: ${escapeHtml(task.category)}<br>Created: ${escapeHtml(task.createdAt)}</div>
+            </div>
+            <div class="points">${Number(task.points || 0)} pts</div>
+          </div>
+          <div class="tags">
+            <span class="tag ${statusClass}">${escapeHtml(task.status)}</span>
+            <span class="tag">${escapeHtml(task.category)}</span>
+          </div>
+        </article>
+      `;
+    }).join("");
+
+    document.querySelectorAll(".task[data-id]").forEach(card => {
+      card.addEventListener("click", () => {
+        openTaskSheet(card.dataset.id);
+      });
+    });
+
+    renderStats();
+  }
+
+  function renderLog() {
+    if (!appState.activityLog.length) {
+      logList.innerHTML = `
+        <div class="empty">
+          No activity yet.
+        </div>
+      `;
+      return;
+    }
+
+    logList.innerHTML = appState.activityLog.map(item => `
+      <div class="log-item">
+        <div class="log-main">${escapeHtml(item.message)}</div>
+        <div class="log-sub">${escapeHtml(item.sub || "")}${item.sub ? " • " : ""}${escapeHtml(item.createdAt)}</div>
+      </div>
+    `).join("");
+  }
+
+  function updateLogVisibility() {
+    logSection.style.display = logVisible ? "block" : "none";
+    toggleLogBtn.textContent = logVisible ? "Hide activity log" : "Show activity log";
+  }
+
+  function closeAllPanels() {
+    overlay.classList.remove("show");
+    drawer.classList.remove("show");
+    taskSheet.classList.remove("show");
+    addSheet.classList.remove("show");
+  }
+
+  function showOverlay() {
+    overlay.classList.add("show");
+  }
+
+  function setAddExpanded(isExpanded) {
+    addExpanded = isExpanded;
+    moreFields.classList.toggle("show", isExpanded);
+    toggleMoreBtn.textContent = isExpanded ? "Less options" : "More options";
+  }
+
+  function openDrawer() {
+    closeAllPanels();
+    showOverlay();
+    drawer.classList.add("show");
+  }
+
+  function openAddSheet() {
+    closeAllPanels();
+    setAddExpanded(false);
+    showOverlay();
+    addSheet.classList.add("show");
+    setTimeout(() => addTitle.focus(), 120);
+  }
+
+  function openTaskSheet(taskId) {
+    const task = appState.tasks.find(t => t.id === taskId);
+    if (!task) return;
+
+    activeTaskId = taskId;
+
+    sheetTaskTitle.textContent = "Review task";
+    detailTitle.textContent = task.title || "Task";
+    detailStatus.textContent = task.status || "open";
+    detailPoints.textContent = `${Number(task.points || 0)} pts`;
+    detailCategory.textContent = task.category || "household";
+    detailCreated.textContent = task.createdAt || "Unknown";
+    detailNote.textContent = task.note?.trim() || "No note.";
+
+    taskActionRow.innerHTML = "";
+
+    if (task.status === "pending") {
+      sheetTaskSub.textContent = "Pending review. Accept it or decline it.";
+      taskActionRow.innerHTML = `
+        <button class="success" id="acceptTaskBtn">Accept</button>
+        <button class="secondary" id="declineTaskBtn">Decline</button>
+        <button class="danger" id="deleteTaskBtn">Delete</button>
+      `;
+      document.getElementById("acceptTaskBtn").addEventListener("click", () => setTaskStatus("approved", "accepted"));
+      document.getElementById("declineTaskBtn").addEventListener("click", () => setTaskStatus("declined", "declined"));
+      document.getElementById("deleteTaskBtn").addEventListener("click", deleteActiveTask);
+
+    } else if (task.status === "approved") {
+      sheetTaskSub.textContent = "Already approved. You can reopen it or delete it.";
+      taskActionRow.innerHTML = `
+        <button class="secondary" id="reopenTaskBtn">Reopen</button>
+        <button class="danger" id="deleteTaskBtn">Delete</button>
+      `;
+      document.getElementById("reopenTaskBtn").addEventListener("click", () => setTaskStatus("open"));
+      document.getElementById("deleteTaskBtn").addEventListener("click", deleteActiveTask);
+
+    } else if (task.status === "declined") {
+      sheetTaskSub.textContent = "This task was declined. You can reopen it or delete it.";
+      taskActionRow.innerHTML = `
+        <button class="secondary" id="reopenTaskBtn">Reopen</button>
+        <button class="danger" id="deleteTaskBtn">Delete</button>
+      `;
+      document.getElementById("reopenTaskBtn").addEventListener("click", () => setTaskStatus("open"));
+      document.getElementById("deleteTaskBtn").addEventListener("click", deleteActiveTask);
+
+    } else {
+      sheetTaskSub.textContent = "This task is open and waiting on the participant side.";
+      taskActionRow.innerHTML = `
+        <button class="danger" id="deleteTaskBtn">Delete</button>
+      `;
+      document.getElementById("deleteTaskBtn").addEventListener("click", deleteActiveTask);
+    }
+
+    closeAllPanels();
+    showOverlay();
+    taskSheet.classList.add("show");
+  }
+
+  function clearAddForm() {
+    addTitle.value = "";
+    addPoints.value = "25";
+    addCategory.value = "household";
+    addStatus.value = "open";
+    addNote.value = "";
+    setAddExpanded(false);
+  }
+
+  function createTask() {
+    const title = addTitle.value.trim();
+    const points = Number(addPoints.value || 0);
+    const category = addCategory.value;
+    const status = addStatus.value;
+    const note = addNote.value.trim();
+
+    if (!title) {
+      alert("Add a task title first.");
+      addTitle.focus();
+      return;
+    }
+
+    const task = {
+      id: makeId(),
+      title,
+      points,
+      category,
+      status,
+      note,
+      createdAt: formatNow()
+    };
+
+    appState.tasks.unshift(task);
+    saveState();
+    renderTasks();
+    addLog(`Task created: ${title}`, `${points} pts • ${category} • ${status}`);
+    clearAddForm();
+    closeAllPanels();
+  }
+
+  function setTaskStatus(newStatus, actionLabel = "") {
+    if (!activeTaskId) return;
+    const task = appState.tasks.find(t => t.id === activeTaskId);
+    if (!task) return;
+
+    const oldStatus = task.status;
+    task.status = newStatus;
+
+    saveState();
+    renderTasks();
+
+    if (actionLabel === "accepted") {
+      addLog(`Task accepted: ${task.title}`, `${oldStatus} → approved`);
+    } else if (actionLabel === "declined") {
+      addLog(`Task declined: ${task.title}`, `${oldStatus} → declined`);
+    } else {
+      addLog(`Task status changed: ${task.title}`, `${oldStatus} → ${newStatus}`);
+    }
+
+    closeAllPanels();
+  }
+
+  function deleteActiveTask() {
+    if (!activeTaskId) return;
+
+    const task = appState.tasks.find(t => t.id === activeTaskId);
+    if (!task) return;
+
+    appState.tasks = appState.tasks.filter(t => t.id !== activeTaskId);
+    saveState();
+    renderTasks();
+    addLog(`Task deleted: ${task.title}`, `${task.points} pts removed`);
+    activeTaskId = null;
+    closeAllPanels();
+  }
+
+  function clearActivityLog() {
+    appState.activityLog = [];
+    saveState();
+    renderLog();
+    closeAllPanels();
+  }
+
+  function resetEverything() {
+    const ok = confirm("Reset all shared task data and logs?");
+    if (!ok) return;
+
+    appState = makeDefaultState();
+    saveState();
+    renderTasks();
+    renderLog();
+    addLog("System reset", "All shared data cleared");
+    closeAllPanels();
+  }
+
+  function refreshFromStorage() {
+    appState = loadState();
+    renderTasks();
+    renderLog();
+  }
+
+  document.querySelectorAll(".pill-btn[data-filter]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      currentFilter = btn.dataset.filter;
+      document.querySelectorAll(".pill-btn[data-filter]").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      renderTasks();
+    });
+  });
+
+  document.getElementById("openDrawerBtn").addEventListener("click", openDrawer);
+  document.getElementById("closeDrawerBtn").addEventListener("click", closeAllPanels);
+  document.getElementById("openAddBtn").addEventListener("click", openAddSheet);
+  document.getElementById("closeAddSheetBtn").addEventListener("click", closeAllPanels);
+  document.getElementById("closeTaskSheetBtn").addEventListener("click", closeAllPanels);
+  document.getElementById("createTaskBtn").addEventListener("click", createTask);
+  document.getElementById("clearAddBtn").addEventListener("click", clearAddForm);
+  document.getElementById("toggleMoreBtn").addEventListener("click", () => setAddExpanded(!addExpanded));
+  document.getElementById("toggleLogBtn").addEventListener("click", () => {
+    logVisible = !logVisible;
+    updateLogVisibility();
+    closeAllPanels();
+  });
+  document.getElementById("hideLogBtn").addEventListener("click", () => {
+    logVisible = false;
+    updateLogVisibility();
+  });
+  document.getElementById("clearLogBtn").addEventListener("click", clearActivityLog);
+  document.getElementById("resetAllBtn").addEventListener("click", resetEverything);
+  document.getElementById("refreshBtn").addEventListener("click", refreshFromStorage);
+  overlay.addEventListener("click", closeAllPanels);
+
+  window.addEventListener("storage", (event) => {
+    if (event.key === STORAGE_KEY) {
+      refreshFromStorage();
+    }
+  });
+
+  renderTasks();
+  renderLog();
+  updateLogVisibility();
+</script>
+</body>
+</html>

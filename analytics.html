@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Analytics Dashboard</title>
+  <style>
+    :root{
+      --bg1:#f8fbff;
+      --bg2:#eef4ff;
+      --card:#ffffff;
+      --line:#e8edf5;
+      --text:#182033;
+      --muted:#6b7280;
+      --blue:#2563eb;
+      --blue-soft:#edf4ff;
+      --green:#127a45;
+      --green-soft:#ecfdf3;
+      --orange:#b54708;
+      --orange-soft:#fff7ed;
+      --purple:#7c3aed;
+      --purple-soft:#f5f3ff;
+      --red:#b42318;
+      --red-soft:#fef3f2;
+      --shadow:0 18px 45px rgba(15,23,42,.08);
+    }
+
+    *{
+      box-sizing:border-box;
+      -webkit-tap-highlight-color:transparent;
+    }
+
+    html,body{
+      margin:0;
+      padding:0;
+      min-height:100%;
+      font-family:Arial, Helvetica, sans-serif;
+      color:var(--text);
+      background:radial-gradient(circle at top left, #ffffff 0%, #f8fbff 35%, #eef4ff 100%);
+    }
+
+    body{
+      padding:18px;
+      overflow-x:hidden;
+    }
+
+    button{
+      font:inherit;
+    }
+
+    .wrap{
+      width:min(1180px,96%);
+      margin:0 auto;
+    }
+
+    .hero{
+      background:rgba(255,255,255,.84);
+      backdrop-filter:blur(12px);
+      border:1px solid rgba(255,255,255,.82);
+      border-radius:32px;
+      box-shadow:var(--shadow);
+      padding:22px;
+      margin-bottom:18px;
+    }
+
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:16px;
+      margin-bottom:14px;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      padding:8px 12px;
+      border-radius:999px;
+      background:var(--purple-soft);
+      color:var(--purple);
+      font-size:12px;
+      font-weight:700;
+      letter-spacing:.4px;
+      text-transform:uppercase;
+      margin-bottom:10px;
+    }
+
+    h1{
+      margin:0 0 8px;
+      font-size:32px;
+      line-height:1.05;
+    }
+
+    .sub{
+      margin:0;
+      color:var(--muted);
+      font-size:15px;
+      line-height:1.55;
+      max-width:800px;
+    }
+
+    .icon-btn{
+      width:48px;
+      height:48px;
+      border:none;
+      border-radius:18px;
+      background:#fff;
+      box-shadow:var(--shadow);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      font-size:18px;
+      color:var(--text);
+      flex:0 0 auto;
+    }
+
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(5,minmax(0,1fr));
+      gap:12px;
+      margin-top:18px;
+    }
+
+    .stat{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:22px;
+      padding:16px;
+      box-shadow:var(--shadow);
+    }
+
+    .stat.good{
+      background:var(--green-soft);
+      border-color:#d8f3e1;
+    }
+
+    .stat.warn{
+      background:var(--orange-soft);
+      border-color:#f8e0c5;
+    }
+
+    .stat.purple{
+      background:var(--purple-soft);
+      border-color:#eadfff;
+    }
+
+    .stat.red{
+      background:var(--red-soft);
+      border-color:#f0c8c4;
+    }
+
+    .stat .k{
+      font-size:12px;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.4px;
+      margin-bottom:8px;
+      font-weight:700;
+    }
+
+    .stat .v{
+      font-size:28px;
+      font-weight:800;
+      line-height:1;
+    }
+
+    .main{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:18px;
+    }
+
+    .section-card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:28px;
+      box-shadow:var(--shadow);
+      padding:18px;
+    }
+
+    .section-card.full{
+      grid-column:1 / -1;
+    }
+
+    .section-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-bottom:14px;
+    }
+
+    .section-top h2{
+      margin:0;
+      font-size:21px;
+    }
+
+    .section-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .pill-btn{
+      border:none;
+      border-radius:999px;
+      padding:10px 14px;
+      font-size:13px;
+      font-weight:700;
+      cursor:pointer;
+      background:#fff;
+      border:1px solid var(--line);
+      color:var(--text);
+    }
+
+    .grade-wrap{
+      display:grid;
+      grid-template-columns:220px minmax(0,1fr);
+      gap:18px;
+      align-items:stretch;
+    }
+
+    .grade-big{
+      border:1px solid var(--line);
+      border-radius:26px;
+      background:#fff;
+      padding:18px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      text-align:center;
+    }
+
+    .grade-label{
+      font-size:12px;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.4px;
+      margin-bottom:10px;
+      font-weight:700;
+    }
+
+    .grade-letter{
+      font-size:72px;
+      font-weight:900;
+      line-height:1;
+      margin-bottom:10px;
+    }
+
+    .grade-score{
+      font-size:20px;
+      font-weight:800;
+    }
+
+    .grade-note{
+      margin-top:8px;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.5;
+    }
+
+    .summary-stack,
+    .metric-list,
+    .insight-list,
+    .task-list{
+      display:grid;
+      gap:12px;
+    }
+
+    .summary-item,
+    .metric-item,
+    .insight-item,
+    .task-item{
+      border:1px solid var(--line);
+      border-radius:20px;
+      background:#fff;
+      padding:14px;
+    }
+
+    .summary-title,
+    .metric-title,
+    .insight-title,
+    .task-title{
+      font-size:15px;
+      font-weight:800;
+      line-height:1.35;
+      margin-bottom:6px;
+    }
+
+    .summary-sub,
+    .metric-sub,
+    .insight-sub,
+    .task-sub{
+      font-size:13px;
+      color:var(--muted);
+      line-height:1.5;
+    }
+
+    .row-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      margin-bottom:8px;
+    }
+
+    .mini-pill{
+      padding:7px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:700;
+      white-space:nowrap;
+      border:1px solid var(--line);
+      background:#fff;
+    }
+
+    .mini-pill.good{
+      background:var(--green-soft);
+      color:var(--green);
+      border-color:#d8f3e1;
+    }
+
+    .mini-pill.warn{
+      background:var(--orange-soft);
+      color:var(--orange);
+      border-color:#f7ddbd;
+    }
+
+    .mini-pill.bad{
+      background:var(--red-soft);
+      color:var(--red);
+      border-color:#f0c8c4;
+    }
+
+    .mini-pill.info{
+      background:var(--blue-soft);
+      color:var(--blue);
+      border-color:#cfe0ff;
+    }
+
+    .mini-pill.purple{
+      background:var(--purple-soft);
+      color:var(--purple);
+      border-color:#eadfff;
+    }
+
+    .score-row{
+      display:grid;
+      gap:10px;
+    }
+
+    .score-line{
+      display:grid;
+      grid-template-columns:140px minmax(0,1fr) 56px;
+      gap:12px;
+      align-items:center;
+    }
+
+    .score-name{
+      font-size:13px;
+      font-weight:700;
+    }
+
+    .bar{
+      width:100%;
+      height:12px;
+      background:#edf2fb;
+      border-radius:999px;
+      overflow:hidden;
+    }
+
+    .bar-fill{
+      height:100%;
+      border-radius:999px;
+      background:linear-gradient(90deg,#dbeafe 0%, #c4b5fd 100%);
+      width:0%;
+    }
+
+    .score-value{
+      font-size:13px;
+      font-weight:800;
+      text-align:right;
+    }
+
+    .empty{
+      padding:18px;
+      border:1px dashed #d7dfed;
+      border-radius:18px;
+      color:var(--muted);
+      text-align:center;
+      background:#fbfdff;
+    }
+
+    .info-box{
+      margin-top:14px;
+      padding:14px;
+      border-radius:18px;
+      background:#f8fbff;
+      border:1px solid var(--line);
+      font-size:14px;
+      color:var(--muted);
+      line-height:1.45;
+    }
+
+    @media (max-width:980px){
+      .main{
+        grid-template-columns:1fr;
+      }
+
+      .grade-wrap{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media (max-width:820px){
+      .stats{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+      }
+
+      .score-line{
+        grid-template-columns:1fr;
+      }
+
+      h1{
+        font-size:27px;
+      }
+
+      body{
+        padding:14px;
+      }
+
+      .grade-letter{
+        font-size:58px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <div class="topbar">
+        <div>
+          <div class="pill">Analytics view</div>
+          <h1>Daily analytics and grading</h1>
+          <p class="sub">This page reads the shared dashboard data and turns it into a daily score, timing summary, pressure signals, and improvement or decline indicators.</p>
+        </div>
+
+        <button class="icon-btn" id="refreshBtn" aria-label="Refresh analytics">↻</button>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="k">Total tasks</div>
+          <div class="v" id="statTotal">0</div>
+        </div>
+        <div class="stat">
+          <div class="k">Queue</div>
+          <div class="v" id="statQueue">0</div>
+        </div>
+        <div class="stat good">
+          <div class="k">Approved</div>
+          <div class="v" id="statApproved">0</div>
+        </div>
+        <div class="stat red">
+          <div class="k">Declined</div>
+          <div class="v" id="statDeclined">0</div>
+        </div>
+        <div class="stat purple">
+          <div class="k">Today score</div>
+          <div class="v" id="statScore">0</div>
+        </div>
+      </div>
+
+      <div class="info-box">
+        Best results happen when tasks store timestamps like <strong>createdAt</strong>, <strong>submittedAt</strong>, <strong>approvedAt</strong>, <strong>declinedAt</strong>, and <strong>reopenedAt</strong>. This page still works without all of them, but gets smarter as you add more history.
+      </div>
+    </section>
+
+    <section class="main">
+      <div class="section-card full">
+        <div class="section-top">
+          <h2>Daily grade</h2>
+          <div class="section-actions">
+            <button class="pill-btn" id="recalcBtn">Recalculate</button>
+          </div>
+        </div>
+
+        <div class="grade-wrap">
+          <div class="grade-big" id="gradeBig">
+            <div class="grade-label">Today</div>
+            <div class="grade-letter" id="gradeLetter">B</div>
+            <div class="grade-score" id="gradeScoreText">82 / 100</div>
+            <div class="grade-note" id="gradeNote">Solid day with room to tighten response speed and reduce backlog.</div>
+          </div>
+
+          <div class="summary-stack">
+            <div class="summary-item">
+              <div class="row-top">
+                <div class="summary-title">Improving</div>
+                <div class="mini-pill good" id="trendPill">steady</div>
+              </div>
+              <div class="summary-sub" id="improvingText">No trend data yet.</div>
+            </div>
+
+            <div class="summary-item">
+              <div class="row-top">
+                <div class="summary-title">Declining</div>
+                <div class="mini-pill warn">watch</div>
+              </div>
+              <div class="summary-sub" id="decliningText">No decline signals yet.</div>
+            </div>
+
+            <div class="summary-item">
+              <div class="row-top">
+                <div class="summary-title">Main takeaway</div>
+                <div class="mini-pill info">daily wrap</div>
+              </div>
+              <div class="summary-sub" id="takeawayText">Waiting for task history.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-top">
+          <h2>Grade breakdown</h2>
+        </div>
+
+        <div class="score-row" id="scoreBreakdown"></div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-top">
+          <h2>Timing snapshot</h2>
+        </div>
+
+        <div class="metric-list" id="timingList"></div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-top">
+          <h2>System pressure</h2>
+        </div>
+
+        <div class="insight-list" id="pressureList"></div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-top">
+          <h2>Category behavior</h2>
+        </div>
+
+        <div class="metric-list" id="categoryList"></div>
+      </div>
+
+      <div class="section-card full">
+        <div class="section-top">
+          <h2>Tasks needing attention</h2>
+        </div>
+
+        <div class="task-list" id="attentionList"></div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "dylan_jamie_shared_dashboard";
+
+    function makeDefaultState() {
+      return {
+        sessionId: "dylan-jamie-001",
+        controllerName: "Dylan",
+        participantName: "Jamie",
+        tasks: [],
+        activityLog: [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+    }
+
+    function safeReadJSON(key, fallback) {
+      try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return fallback;
+        return JSON.parse(raw);
+      } catch (err) {
+        console.error("read error", err);
+        return fallback;
+      }
+    }
+
+    function loadState() {
+      const fallback = makeDefaultState();
+      const state = safeReadJSON(STORAGE_KEY, fallback);
+      if (!state || typeof state !== "object") return fallback;
+      if (!Array.isArray(state.tasks)) state.tasks = [];
+      if (!Array.isArray(state.activityLog)) state.activityLog = [];
+      return state;
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function parseDate(value) {
+      if (!value) return null;
+      const d = new Date(value);
+      return Number.isNaN(d.getTime()) ? null : d;
+    }
+
+    function isToday(value) {
+      const d = parseDate(value);
+      if (!d) return false;
+      const now = new Date();
+      return d.getFullYear() === now.getFullYear()
+        && d.getMonth() === now.getMonth()
+        && d.getDate() === now.getDate();
+    }
+
+    function minutesBetween(a, b) {
+      const da = parseDate(a);
+      const db = parseDate(b);
+      if (!da || !db) return null;
+      return Math.max(0, Math.round((db - da) / 60000));
+    }
+
+    function average(nums) {
+      const valid = nums.filter(v => typeof v === "number" && !Number.isNaN(v));
+      if (!valid.length) return null;
+      return Math.round(valid.reduce((a,b) => a + b, 0) / valid.length);
+    }
+
+    function formatMinutes(mins) {
+      if (mins === null || mins === undefined) return "N/A";
+      if (mins < 60) return `${mins}m`;
+      const hours = Math.floor(mins / 60);
+      const rem = mins % 60;
+      if (hours < 24) return `${hours}h ${rem}m`;
+      const days = Math.floor(hours / 24);
+      const h = hours % 24;
+      return `${days}d ${h}h`;
+    }
+
+    function taskMetrics(task) {
+      return {
+        submitMinutes: minutesBetween(task.createdAt, task.submittedAt),
+        approveMinutes: minutesBetween(task.submittedAt, task.approvedAt),
+        totalMinutes: minutesBetween(task.createdAt, task.approvedAt),
+        declinedMinutes: minutesBetween(task.declinedAt, task.reopenedAt)
+      };
+    }
+
+    function ageHours(task) {
+      const d = parseDate(task.createdAt);
+      if (!d) return null;
+      return (Date.now() - d.getTime()) / 3600000;
+    }
+
+    function gradeLetter(score) {
+      if (score >= 97) return "A+";
+      if (score >= 93) return "A";
+      if (score >= 90) return "A-";
+      if (score >= 87) return "B+";
+      if (score >= 83) return "B";
+      if (score >= 80) return "B-";
+      if (score >= 77) return "C+";
+      if (score >= 73) return "C";
+      if (score >= 70) return "C-";
+      if (score >= 67) return "D+";
+      if (score >= 63) return "D";
+      if (score >= 60) return "D-";
+      return "F";
+    }
+
+    function gradeColorClass(score) {
+      if (score >= 90) return "good";
+      if (score >= 75) return "info";
+      if (score >= 60) return "warn";
+      return "bad";
+    }
+
+    function getTodayTasks(tasks) {
+      return tasks.filter(task =>
+        isToday(task.createdAt) ||
+        isToday(task.submittedAt) ||
+        isToday(task.approvedAt) ||
+        isToday(task.declinedAt) ||
+        isToday(task.reopenedAt)
+      );
+    }
+
+    function getYesterdayTasks(tasks) {
+      const now = new Date();
+      const y = new Date(now);
+      y.setDate(now.getDate() - 1);
+
+      return tasks.filter(task => {
+        const d = parseDate(task.createdAt);
+        if (!d) return false;
+        return d.getFullYear() === y.getFullYear()
+          && d.getMonth() === y.getMonth()
+          && d.getDate() === y.getDate();
+      });
+    }
+
+    function buildScores(tasks) {
+      const total = tasks.length;
+      const openCount = tasks.filter(t => t.status === "open").length;
+      const pendingCount = tasks.filter(t => t.status === "pending").length;
+      const approvedCount = tasks.filter(t => t.status === "approved").length;
+      const declinedCount = tasks.filter(t => t.status === "declined").length;
+
+      const submitAvg = average(tasks.map(t => taskMetrics(t).submitMinutes));
+      const approveAvg = average(tasks.map(t => taskMetrics(t).approveMinutes));
+      const totalAvg = average(tasks.map(t => taskMetrics(t).totalMinutes));
+
+      let responseScore = 100;
+      if (submitAvg !== null) {
+        if (submitAvg <= 30) responseScore = 100;
+        else if (submitAvg <= 60) responseScore = 90;
+        else if (submitAvg <= 180) responseScore = 75;
+        else if (submitAvg <= 720) responseScore = 55;
+        else responseScore = 35;
+      } else {
+        responseScore = total ? 60 : 0;
+      }
+
+      let completionScore = 100;
+      if (total > 0) {
+        const completionRate = Math.round((approvedCount / total) * 100);
+        completionScore = completionRate;
+      } else {
+        completionScore = 0;
+      }
+
+      let reworkScore = 100;
+      if (total > 0) {
+        const reworkPenalty = Math.round((declinedCount / total) * 100);
+        reworkScore = Math.max(0, 100 - reworkPenalty);
+      }
+
+      let backlogScore = 100;
+      const staleOpen = tasks.filter(t => t.status === "open" && (ageHours(t) ?? 0) > 24).length;
+      const stalePending = tasks.filter(t => t.status === "pending" && (ageHours(t) ?? 0) > 12).length;
+      backlogScore -= staleOpen * 20;
+      backlogScore -= stalePending * 15;
+      backlogScore -= pendingCount * 5;
+      backlogScore = Math.max(0, Math.min(100, backlogScore));
+
+      let consistencyScore = 100;
+      if (total === 0) {
+        consistencyScore = 0;
+      } else {
+        const moved = tasks.filter(t =>
+          t.status === "approved" ||
+          t.status === "pending" ||
+          t.status === "declined"
+        ).length;
+        consistencyScore = Math.round((moved / total) * 100);
+      }
+
+      const overall = Math.round(
+        responseScore * 0.25 +
+        completionScore * 0.30 +
+        reworkScore * 0.20 +
+        backlogScore * 0.15 +
+        consistencyScore * 0.10
+      );
+
+      return {
+        overall,
+        responseScore,
+        completionScore,
+        reworkScore,
+        backlogScore,
+        consistencyScore,
+        submitAvg,
+        approveAvg,
+        totalAvg,
+        openCount,
+        pendingCount,
+        approvedCount,
+        declinedCount,
+        staleOpen,
+        stalePending
+      };
+    }
+
+    function buildTrend(todayScores, yesterdayScores) {
+      if (!yesterdayScores) {
+        return {
+          pill: "new",
+          improving: "No yesterday comparison yet. This is the current baseline.",
+          declining: "Need at least one earlier day of data to compare trends.",
+          takeaway: "Start building history so the grade can compare day-to-day movement."
+        };
+      }
+
+      const diff = todayScores.overall - yesterdayScores.overall;
+      let pill = "steady";
+      if (diff >= 5) pill = "up";
+      else if (diff <= -5) pill = "down";
+
+      const improving = [];
+      const declining = [];
+
+      if ((todayScores.responseScore - yesterdayScores.responseScore) > 5) improving.push("response speed");
+      if ((todayScores.completionScore - yesterdayScores.completionScore) > 5) improving.push("completion rate");
+      if ((todayScores.reworkScore - yesterdayScores.reworkScore) > 5) improving.push("fewer declines");
+      if ((todayScores.backlogScore - yesterdayScores.backlogScore) > 5) improving.push("backlog health");
+
+      if ((todayScores.responseScore - yesterdayScores.responseScore) < -5) declining.push("response speed");
+      if ((todayScores.completionScore - yesterdayScores.completionScore) < -5) declining.push("completion rate");
+      if ((todayScores.reworkScore - yesterdayScores.reworkScore) < -5) declining.push("decline pressure");
+      if ((todayScores.backlogScore - yesterdayScores.backlogScore) < -5) declining.push("backlog health");
+
+      let takeaway = "Performance is holding fairly steady.";
+      if (diff >= 5) takeaway = "The system is improving overall today.";
+      if (diff <= -5) takeaway = "The system slipped today and needs correction.";
+
+      return {
+        pill,
+        improving: improving.length ? `Improving: ${improving.join(", ")}.` : "No major improvement signals yet.",
+        declining: declining.length ? `Declining: ${declining.join(", ")}.` : "No major decline signals right now.",
+        takeaway
+      };
+    }
+
+    function categoryStats(tasks) {
+      const map = {};
+
+      tasks.forEach(task => {
+        const category = task.category || "uncategorized";
+        if (!map[category]) {
+          map[category] = {
+            total: 0,
+            open: 0,
+            pending: 0,
+            approved: 0,
+            declined: 0,
+            totalTimes: []
+          };
+        }
+
+        map[category].total += 1;
+        if (map[category][task.status] !== undefined) {
+          map[category][task.status] += 1;
+        }
+
+        const t = taskMetrics(task).totalMinutes;
+        if (t !== null) map[category].totalTimes.push(t);
+      });
+
+      return Object.entries(map).map(([category, data]) => ({
+        category,
+        ...data,
+        avgTime: average(data.totalTimes)
+      })).sort((a,b) => b.total - a.total);
+    }
+
+    function renderAnalytics() {
+      const state = loadState();
+      const allTasks = [...state.tasks];
+      const todayTasks = getTodayTasks(allTasks);
+      const yesterdayTasks = getYesterdayTasks(allTasks);
+
+      const todayScores = buildScores(todayTasks);
+      const yesterdayScores = yesterdayTasks.length ? buildScores(yesterdayTasks) : null;
+      const trend = buildTrend(todayScores, yesterdayScores);
+
+      const queueCount = todayScores.openCount + todayScores.pendingCount;
+
+      document.getElementById("statTotal").textContent = todayTasks.length;
+      document.getElementById("statQueue").textContent = queueCount;
+      document.getElementById("statApproved").textContent = todayScores.approvedCount;
+      document.getElementById("statDeclined").textContent = todayScores.declinedCount;
+      document.getElementById("statScore").textContent = todayScores.overall;
+
+      const letter = gradeLetter(todayScores.overall);
+      document.getElementById("gradeLetter").textContent = letter;
+      document.getElementById("gradeScoreText").textContent = `${todayScores.overall} / 100`;
+      document.getElementById("gradeBig").className = "grade-big";
+      document.getElementById("gradeBig").classList.add(gradeColorClass(todayScores.overall));
+
+      let note = "Not enough movement yet to judge the day.";
+      if (todayTasks.length) {
+        if (todayScores.overall >= 90) note = "Strong day. Fast movement and healthy follow-through.";
+        else if (todayScores.overall >= 80) note = "Solid day with a few places to tighten.";
+        else if (todayScores.overall >= 70) note = "Mixed day. Some progress, but friction is showing.";
+        else if (todayScores.overall >= 60) note = "Rough day. Backlog or rework is dragging the system.";
+        else note = "Heavy drag today. Too much friction, delay, or unresolved work.";
+      }
+      document.getElementById("gradeNote").textContent = note;
+
+      const trendPill = document.getElementById("trendPill");
+      trendPill.textContent = trend.pill;
+      trendPill.className = "mini-pill";
+      if (trend.pill === "up") trendPill.classList.add("good");
+      else if (trend.pill === "down") trendPill.classList.add("bad");
+      else trendPill.classList.add("info");
+
+      document.getElementById("improvingText").textContent = trend.improving;
+      document.getElementById("decliningText").textContent = trend.declining;
+      document.getElementById("takeawayText").textContent = trend.takeaway;
+
+      const scoreBreakdown = document.getElementById("scoreBreakdown");
+      const scoreRows = [
+        ["Response", todayScores.responseScore],
+        ["Completion", todayScores.completionScore],
+        ["Rework", todayScores.reworkScore],
+        ["Backlog", todayScores.backlogScore],
+        ["Consistency", todayScores.consistencyScore]
+      ];
+
+      scoreBreakdown.innerHTML = scoreRows.map(([name, value]) => `
+        <div class="score-line">
+          <div class="score-name">${escapeHtml(name)}</div>
+          <div class="bar"><div class="bar-fill" style="width:${value}%"></div></div>
+          <div class="score-value">${value}</div>
+        </div>
+      `).join("");
+
+      const timingList = document.getElementById("timingList");
+      timingList.innerHTML = `
+        <div class="metric-item">
+          <div class="metric-title">Average submit time</div>
+          <div class="metric-sub">${formatMinutes(todayScores.submitAvg)}</div>
+        </div>
+        <div class="metric-item">
+          <div class="metric-title">Average approval lag</div>
+          <div class="metric-sub">${formatMinutes(todayScores.approveAvg)}</div>
+        </div>
+        <div class="metric-item">
+          <div class="metric-title">Average full completion</div>
+          <div class="metric-sub">${formatMinutes(todayScores.totalAvg)}</div>
+        </div>
+        <div class="metric-item">
+          <div class="metric-title">Same-day queue load</div>
+          <div class="metric-sub">Open: ${todayScores.openCount} • Pending: ${todayScores.pendingCount}</div>
+        </div>
+      `;
+
+      const pressureList = document.getElementById("pressureList");
+      const pressureItems = [];
+
+      if (!todayTasks.length) {
+        pressureItems.push({
+          title: "No daily activity yet",
+          sub: "Once tasks move through the system, pressure signals will appear here.",
+          pill: "info"
+        });
+      } else {
+        if (todayScores.staleOpen > 0) {
+          pressureItems.push({
+            title: "Open backlog is aging",
+            sub: `${todayScores.staleOpen} open task(s) have been sitting too long.`,
+            pill: "bad"
+          });
+        }
+        if (todayScores.stalePending > 0) {
+          pressureItems.push({
+            title: "Pending review is slow",
+            sub: `${todayScores.stalePending} pending task(s) have waited too long for a decision.`,
+            pill: "warn"
+          });
+        }
+        if (todayScores.declinedCount > 0) {
+          pressureItems.push({
+            title: "Rework is happening",
+            sub: `${todayScores.declinedCount} task(s) were declined, which means extra correction cycles.`,
+            pill: "warn"
+          });
+        }
+        if (todayScores.approvedCount > 0 && todayScores.declinedCount === 0 && todayScores.pendingCount === 0) {
+          pressureItems.push({
+            title: "Flow is clean",
+            sub: "Tasks are moving through without much friction.",
+            pill: "good"
+          });
+        }
+        if (!pressureItems.length) {
+          pressureItems.push({
+            title: "System looks balanced",
+            sub: "No major pressure signals are standing out right now.",
+            pill: "info"
+          });
+        }
+      }
+
+      pressureList.innerHTML = pressureItems.map(item => `
+        <div class="insight-item">
+          <div class="row-top">
+            <div class="insight-title">${escapeHtml(item.title)}</div>
+            <div class="mini-pill ${escapeHtml(item.pill)}">${escapeHtml(item.pill)}</div>
+          </div>
+          <div class="insight-sub">${escapeHtml(item.sub)}</div>
+        </div>
+      `).join("");
+
+      const categoryList = document.getElementById("categoryList");
+      const categories = categoryStats(todayTasks);
+
+      if (!categories.length) {
+        categoryList.innerHTML = `<div class="empty">No category data yet.</div>`;
+      } else {
+        categoryList.innerHTML = categories.map(cat => `
+          <div class="metric-item">
+            <div class="row-top">
+              <div class="metric-title">${escapeHtml(cat.category)}</div>
+              <div class="mini-pill purple">${cat.total} task(s)</div>
+            </div>
+            <div class="metric-sub">
+              Open: ${cat.open} • Pending: ${cat.pending} • Approved: ${cat.approved} • Declined: ${cat.declined} • Avg completion: ${formatMinutes(cat.avgTime)}
+            </div>
+          </div>
+        `).join("");
+      }
+
+      const attentionList = document.getElementById("attentionList");
+      const flagged = todayTasks
+        .map(task => ({
+          ...task,
+          age: ageHours(task)
+        }))
+        .filter(task =>
+          (task.status === "open" && (task.age ?? 0) > 24) ||
+          (task.status === "pending" && (task.age ?? 0) > 12) ||
+          task.status === "declined"
+        );
+
+      if (!flagged.length) {
+        attentionList.innerHTML = `<div class="empty">Nothing urgent is standing out right now.</div>`;
+      } else {
+        attentionList.innerHTML = flagged.map(task => `
+          <div class="task-item">
+            <div class="row-top">
+              <div class="task-title">${escapeHtml(task.title || "Untitled task")}</div>
+              <div class="mini-pill ${
+                task.status === "approved" ? "good" :
+                task.status === "declined" ? "bad" :
+                task.status === "pending" ? "warn" : "info"
+              }">${escapeHtml(task.status)}</div>
+            </div>
+            <div class="task-sub">
+              Category: ${escapeHtml(task.category || "uncategorized")} • Created: ${escapeHtml(task.createdAt || "Unknown")}
+            </div>
+          </div>
+        `).join("");
+      }
+    }
+
+    function ageHours(task) {
+      const d = parseDate(task.createdAt);
+      if (!d) return null;
+      return (Date.now() - d.getTime()) / 3600000;
+    }
+
+    document.getElementById("refreshBtn").addEventListener("click", renderAnalytics);
+    document.getElementById("recalcBtn").addEventListener("click", renderAnalytics);
+
+    window.addEventListener("storage", (event) => {
+      if (event.key === STORAGE_KEY) {
+        renderAnalytics();
+      }
+    });
+
+    renderAnalytics();
+  </script>
+</body>
+</html>
