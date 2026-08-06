@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0a0a0b">
-<meta name="houseplay-loader" content="safari-safe-v5-2026-08-06">
+<meta name="houseplay-loader" content="private-admin-v6-2026-08-06">
 <title>HousePlay</title>
 <style>
 :root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0a0a0b;color:#f5f2f2;font-family:system-ui,-apple-system,sans-serif;padding:24px}main{width:min(100%,440px);padding:28px;border:1px solid #303036;border-radius:24px;background:#141416;text-align:center}.logo{font-size:42px}h1{margin:10px 0 6px}p{color:#aaa4a6;line-height:1.5}#error{display:none;color:#ff9b9f;overflow-wrap:anywhere}
@@ -32,11 +32,31 @@
     if(box){box.style.display="block";box.textContent="Reload this page. Error: "+(error&&error.message?error.message:String(error));}
   }
 
+  function addPrivateAdminCheck(source){
+    let patched=source;
+    patched=patched.replace(
+      'const KEY="houseplay-v3";',
+      'const KEY="houseplay-v3";const ADMIN_CHECK="c103df72e15cf510fd1acdd2fa2e71fdb7fb3ebf72441fd79d8aa1bee87169fd";async function validAdminEntry(value){const data=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(value));return Array.from(new Uint8Array(data),b=>b.toString(16).padStart(2,"0")).join("")===ADMIN_CHECK}'
+    );
+    patched=patched.replace(
+      'document.getElementById("pinSetup").style.display=s.pin?"none":"block";document.getElementById("pinLogin").style.display=s.pin?"block":"none";',
+      'document.getElementById("pinSetup").style.display="none";document.getElementById("pinLogin").style.display="block";'
+    );
+    patched=patched.replace(
+      'document.getElementById("unlockAdmin").onclick=()=>{if(document.getElementById("pinInput").value!==s.pin)',
+      'document.getElementById("unlockAdmin").onclick=async()=>{if(!(await validAdminEntry(document.getElementById("pinInput").value)))'
+    );
+    if(!patched.includes('const ADMIN_CHECK=')||!patched.includes('await validAdminEntry')){
+      throw new Error("Admin access update could not be applied");
+    }
+    return patched;
+  }
+
   try{
     const parts=[];
     for(const name of files){
       const url=new URL("houseplay-v4/"+name,location.href);
-      url.searchParams.set("build","safari-safe-v5-20260806");
+      url.searchParams.set("build","private-admin-v6-20260806");
       const response=await fetch(url.href,{cache:"no-store"});
       if(!response.ok)throw new Error(name+" returned "+response.status);
       parts.push((await response.text()).trim());
@@ -53,10 +73,15 @@
     }
 
     const parsed=new DOMParser().parseFromString(html,"text/html");
+    const setup=parsed.getElementById("pinSetup");
+    const login=parsed.getElementById("pinLogin");
+    if(setup)setup.style.display="none";
+    if(login)login.style.display="block";
+
     const scripts=[...parsed.querySelectorAll("script")].map(script=>({
       src:script.getAttribute("src"),
       type:script.getAttribute("type"),
-      text:script.textContent||""
+      text:script.src?script.textContent||"":addPrivateAdminCheck(script.textContent||"")
     }));
     parsed.querySelectorAll("script").forEach(script=>script.remove());
 
