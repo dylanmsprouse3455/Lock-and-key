@@ -54,3 +54,5 @@ jobs:
           git add index.html
           git commit -m "Publish standalone HousePlay page"
           git push
+
+# Triggered after workflow installation so GitHub assembles the standalone page.
