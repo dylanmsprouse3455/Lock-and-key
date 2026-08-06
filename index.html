@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0a0a0b">
-<meta name="houseplay-loader" content="private-admin-v6-2026-08-06">
+<meta name="houseplay-loader" content="coke-rules-v9-2026-08-06">
 <title>HousePlay</title>
 <style>
 :root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0a0a0b;color:#f5f2f2;font-family:system-ui,-apple-system,sans-serif;padding:24px}main{width:min(100%,440px);padding:28px;border:1px solid #303036;border-radius:24px;background:#141416;text-align:center}.logo{font-size:42px}h1{margin:10px 0 6px}p{color:#aaa4a6;line-height:1.5}#error{display:none;color:#ff9b9f;overflow-wrap:anywhere}
@@ -32,8 +32,9 @@
     if(box){box.style.display="block";box.textContent="Reload this page. Error: "+(error&&error.message?error.message:String(error));}
   }
 
-  function addPrivateAdminCheck(source){
+  function patchApp(source){
     let patched=source;
+
     patched=patched.replace(
       'const KEY="houseplay-v3";',
       'const KEY="houseplay-v3";const ADMIN_CHECK="c103df72e15cf510fd1acdd2fa2e71fdb7fb3ebf72441fd79d8aa1bee87169fd";async function validAdminEntry(value){const data=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(value));return Array.from(new Uint8Array(data),b=>b.toString(16).padStart(2,"0")).join("")===ADMIN_CHECK}'
@@ -46,8 +47,78 @@
       'document.getElementById("unlockAdmin").onclick=()=>{if(document.getElementById("pinInput").value!==s.pin)',
       'document.getElementById("unlockAdmin").onclick=async()=>{if(!(await validAdminEntry(document.getElementById("pinInput").value)))'
     );
+
+    patched=patched.replace(
+      '<small id="cokePenaltyText" style="display:block;margin-top:5px">Rolling 7 days: 0 · 12 triggers a ticket penalty</small>',
+      '<small id="cokePenaltyText" style="display:block;margin-top:5px">First 4 each day are free · extras cost 2 points</small>'
+    );
+    patched=patched.replace(
+      '<div class="row"><div><strong>One Coke</strong><small id="cokeCostText">Costs 2 points · tickets break automatically</small></div><button class="btn sm" id="cokeBtn2">Log</button></div>',
+      '<div class="row"><div><strong>Cokes</strong><small id="cokeCostText">4 free each day · extras cost 2 points</small></div><button class="btn sm" id="cokeBtn2">Log</button></div>'
+    );
+
+    patched=patched.replace(/function cokes7\(\)\{[^\n]*\}\n/,"");
+    patched=patched.replace(
+      /function cokeDailyStatus\(targetKey=today\(\)\)\{[\s\S]*?\n\}\nfunction takeTicketPenalty/,
+      'function cokeDailyStatus(targetKey=today()){\n  const todayUnits=cokeUnitsOnDate(targetKey);\n  const freeAllowance=Math.max(0,DAILY_COKES-todayUnits.penalties);\n  const freeUsed=Math.min(todayUnits.drinks,freeAllowance);\n  const remaining=Math.max(0,freeAllowance-freeUsed);\n  const paidExtras=Math.max(0,todayUnits.drinks-freeAllowance);\n  return {base:DAILY_COKES,freeAllowance,freeUsed,paidExtras,drinks:todayUnits.drinks,penalties:todayUnits.penalties,remaining};\n}\nfunction takeTicketPenalty'
+    );
+    patched=patched.replace(/function takeTicketPenalty\(reason\)\{[\s\S]*?\n\}\nfunction requestCoke/,"function requestCoke");
+    patched=patched.replace(
+      /function requestCoke\(\)\{[\s\S]*?\n\}\nfunction applyPoints/,
+      'function requestCoke(){\n  if(cokeLogBusy){toast("One Coke is already being logged.");return}\n  cokeLogBusy=true;\n  cleanupExpired();\n\n  const before=cokeDailyStatus();\n  const isFree=before.remaining>0;\n  const cost=isFree?0:2;\n  const totalValue=s.points+s.tickets*10;\n\n  if(cost>0&&totalValue<cost){\n    cokeLogBusy=false;\n    toast(`Jamie has used today\\\'s ${before.freeAllowance} free Cokes and needs 2 points for another. Current stored value: ${totalValue}.`);\n    return;\n  }\n\n  if(cost>0){\n    const ticketsNeeded=Math.max(0,Math.ceil((cost-s.points)/10));\n    const ticketsToBreak=Math.min(s.tickets,ticketsNeeded);\n    for(let i=0;i<ticketsToBreak;i++){\n      s.tickets--;s.points+=10;\n      hist("ticket","Ticket converted back into 10 points for an extra Coke",0,"revoked");\n    }\n    s.points-=cost;\n    s.monthStats[month()]=(s.monthStats[month()]||0)-cost;\n  }\n\n  s.cokes.push(now());\n  hist("coke",isFree?"Free daily Coke":"Extra Coke",-cost,"logged");\n\n  const after=cokeDailyStatus();\n  if(isFree){\n    toast(`Free Coke logged. ${after.drinks}/${after.freeAllowance} free Cokes used today · ${after.remaining} free remaining.`);\n  }else{\n    toast(`Extra Coke logged for 2 points. ${after.paidExtras} paid extra${after.paidExtras===1?"":"s"} today.`);\n  }\n\n  save();\n  setTimeout(()=>{cokeLogBusy=false},900);\n}\nfunction applyPoints'
+    );
+
+    patched=patched.replace(
+      'const cokeStatus=cokeDailyStatus(),cw=cokes7().length,losses=activeCokeLosses(),totalValue=s.points+s.tickets*10,cost=Math.max(0,Number(s.settings.cokeCost||0));',
+      'const cokeStatus=cokeDailyStatus(),losses=activeCokeLosses(),nextCokeFree=cokeStatus.remaining>0;'
+    );
+    patched=patched.replace(
+      'document.getElementById("cokeToday").textContent=cokeStatus.drinks;document.getElementById("cokeAllowance").textContent=DAILY_COKES;',
+      'document.getElementById("cokeToday").textContent=cokeStatus.drinks;document.getElementById("cokeAllowance").textContent=cokeStatus.freeAllowance;'
+    );
+    patched=patched.replace(
+      'document.getElementById("cokeBalanceText").textContent=cokeStatus.remaining>=0?cokeStatus.remaining+" remaining today":Math.abs(cokeStatus.remaining)+" Coke deficit carried forward";',
+      'document.getElementById("cokeBalanceText").textContent=cokeStatus.remaining>0?cokeStatus.remaining+" free Coke"+(cokeStatus.remaining===1?"":"s")+" remaining today":"Free allowance used · additional Cokes cost 2 points";'
+    );
+    patched=patched.replace(
+      'document.getElementById("cokeBar").style.width=Math.min(100,cokeStatus.drinks/DAILY_COKES*100)+"%";',
+      'document.getElementById("cokeBar").style.width=Math.min(100,cokeStatus.freeUsed/Math.max(1,cokeStatus.freeAllowance)*100)+"%";'
+    );
+    patched=patched.replace(
+      'document.getElementById("cokePenaltyText").textContent="Rolling 7 days: "+cw+" · 12 triggers a ticket penalty"+(losses?" · "+losses+" active wheel Coke penalty"+(losses===1?"":"s"):"");',
+      'document.getElementById("cokePenaltyText").textContent="First 4 each day are free · extras cost 2 points"+(losses?" · "+losses+" active wheel Coke penalty"+(losses===1?"":"s"):"");'
+    );
+    patched=patched.replace(
+      'document.getElementById("cokeCostText").textContent="Logging costs "+cost+" point"+(cost===1?"":"s")+" · tickets break automatically · only the daily Coke allowance can go into deficit";',
+      'document.getElementById("cokeCostText").textContent="The first 4 Cokes each day are free · every additional Coke costs 2 points · tickets break automatically";'
+    );
+    patched=patched.replace(
+      'document.getElementById("cokeBtn").textContent="Log Coke — "+cost+" pt"+(cost===1?"":"s");',
+      'document.getElementById("cokeBtn").textContent=nextCokeFree?"Log Coke — free":"Log extra Coke — 2 pts";'
+    );
+    patched=patched.replace(
+      'document.getElementById("cokeBtn").disabled=false;document.getElementById("cokeBtn2").textContent="Log — "+cost;document.getElementById("cokeBtn2").disabled=false;',
+      'document.getElementById("cokeBtn").disabled=false;document.getElementById("cokeBtn2").textContent=nextCokeFree?"Log — free":"Log — 2 pts";document.getElementById("cokeBtn2").disabled=false;'
+    );
+
+    patched=patched.replace(
+      '<div class="two"><div><label>Coke cost</label><input id="cokeCost" type="number" min="0" max="99"></div><div><label>Dylan email</label><input id="email" type="email" placeholder="name@example.com"></div></div>',
+      '<div><label>Dylan email</label><input id="email" type="email" placeholder="name@example.com"></div>'
+    );
+    patched=patched.replace(
+      'document.getElementById("cokeCost").value=s.settings.cokeCost;document.getElementById("email").value=s.settings.email||"";',
+      'document.getElementById("email").value=s.settings.email||"";'
+    );
+    patched=patched.replace(
+      'document.getElementById("saveSettings").onclick=()=>{s.settings.cokeCost=Math.max(0,Number(document.getElementById("cokeCost").value||0));s.settings.email=document.getElementById("email").value.trim();save();toast("Settings saved.")};',
+      'document.getElementById("saveSettings").onclick=()=>{s.settings.email=document.getElementById("email").value.trim();save();toast("Settings saved.")};'
+    );
+
     if(!patched.includes('const ADMIN_CHECK=')||!patched.includes('await validAdminEntry')){
       throw new Error("Admin access update could not be applied");
+    }
+    if(!patched.includes('const cost=isFree?0:2;')||patched.includes('12 Cokes within 7 days')||patched.includes('12 triggers a ticket penalty')||patched.includes('function takeTicketPenalty')){
+      throw new Error("Coke rule update could not be applied");
     }
     return patched;
   }
@@ -56,7 +127,7 @@
     const parts=[];
     for(const name of files){
       const url=new URL("houseplay-v4/"+name,location.href);
-      url.searchParams.set("build","private-admin-v6-20260806");
+      url.searchParams.set("build","coke-rules-v9-20260806");
       const response=await fetch(url.href,{cache:"no-store"});
       if(!response.ok)throw new Error(name+" returned "+response.status);
       parts.push((await response.text()).trim());
@@ -81,7 +152,7 @@
     const scripts=[...parsed.querySelectorAll("script")].map(script=>({
       src:script.getAttribute("src"),
       type:script.getAttribute("type"),
-      text:script.src?script.textContent||"":addPrivateAdminCheck(script.textContent||"")
+      text:script.src?script.textContent||"":patchApp(script.textContent||"")
     }));
     parsed.querySelectorAll("script").forEach(script=>script.remove());
 
