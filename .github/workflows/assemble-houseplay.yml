@@ -1,0 +1,56 @@
+name: Assemble HousePlay
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "houseplay-v4/**"
+      - ".github/workflows/assemble-houseplay.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  assemble:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Assemble standalone HousePlay page
+        shell: bash
+        run: |
+          cat \
+            houseplay-v4/chunk-01-a.txt \
+            houseplay-v4/chunk-01-b0.txt \
+            houseplay-v4/chunk-01-b1.txt \
+            houseplay-v4/chunk-01-b2.txt \
+            houseplay-v4/chunk-01-c.txt \
+            houseplay-v4/chunk-02.txt \
+            houseplay-v4/chunk-03.txt \
+            houseplay-v4/chunk-04.txt \
+            houseplay-v4/chunk-05.txt \
+            houseplay-v4/chunk-06.txt \
+            houseplay-v4/chunk-07.txt \
+            houseplay-v4/chunk-08.txt \
+            | tr -d '\r\n ' \
+            | base64 --decode > index.html
+
+          grep -q 'name="houseplay-build" content="full-v4-2026-08-06"' index.html
+          test "$(wc -c < index.html)" -gt 50000
+
+      - name: Commit standalone page
+        shell: bash
+        run: |
+          if git diff --quiet -- index.html; then
+            echo "index.html is already current."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Publish standalone HousePlay page"
+          git push
